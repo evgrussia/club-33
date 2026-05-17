@@ -1,0 +1,82 @@
+phase_summary:
+  phase: "Design"
+  status: "completed"
+  duration: "параллельное выполнение 3 агентов"
+  created_at: "2026-05-15"
+  created_by: "Orchestrator Agent"
+
+  key_outcomes:
+    - "UX: 18 user flows по 7 эпикам, sitemap для 3 поверхностей, 40 wireframes (17 bot + 10 mini-app + 13 admin), a11y WCAG AA"
+    - "UI: design system + 27-цветная палитра light/dark, 38 компонентов, design-tokens.yaml, brand color #C9A24A, моно-система"
+    - "Content: 6 артефактов (tone + ~45 bot + 12 mini-app screens + 22 admin + 25 error states + закон-черновик)"
+    - "component-stories-spec.md создан (обязательно по rule 08 — основа для Storybook в Phase 6)"
+
+  key_decisions:
+    ux:
+      - "DEC-UX-001: 5 tab bar в mini-app (Home/Profile/Социал/Поиск/База), Дары в quick-actions"
+      - "DEC-UX-002: Закон клуба — экран с явной плашкой «Кнопки «Согласен» нет специально» + ручной ввод"
+      - "DEC-UX-003: Match-карточки в Lunchclub-стиле (avatar + role + ★ + reasoning + CTA)"
+      - "DEC-UX-004: /ask в Perplexity-стиле (footnotes [1][2][3] с раскрытием source)"
+      - "DEC-UX-005: Feedback везде 3-значный (полезно/нейтрально/мимо) — без downvote"
+      - "DEC-UX-006: Получатель респекта не видит имя дарителя в UI; админ — видит"
+      - "DEC-UX-007: Sidebar админки скрывает пункты по RBAC (не disabled)"
+    ui:
+      - "DEC-UI-001: Primary #C9A24A (light) / #E6BC5E (dark) — метафора Юпитер/звезда"
+      - "DEC-UI-002: TelegramUI как база + кастомные обёртки доменных компонентов"
+      - "DEC-UI-003: Tabler Icons + 10 кастомных (respect, day, gift-day, lifetime, pulse, match, kb-quote, star)"
+      - "DEC-UI-004: Confetti ОТКЛОНЁН → pulse 300ms + haptic.success"
+      - "DEC-UI-005: Моно-система mini-app + админка (только плотность hit-area отличается)"
+      - "DEC-UI-006: Lottie/3D/glassmorphism/neumorphism запрещены"
+    content:
+      - "DEC-CONTENT-001: ≤2 предложения в боте, ≤1 emoji, на «ты»"
+      - "DEC-CONTENT-002: Стоп-лист (уважаемый, премиум, VIP, эксклюзивный, юзер, произошла ошибка)"
+      - "DEC-CONTENT-003: Рекомендован Вариант 2 фразы согласия + свободный ввод с AI-валидацией"
+      - "DEC-CONTENT-004: Закон клуба остаётся DRAFT (OD-CLUB-04/05 + юр. согласование)"
+
+  artifacts:
+    ux:
+      - "docs/design/ux/user-flows.md (18 flows)"
+      - "docs/design/ux/information-architecture.md (sitemap бота/mini-app/админки + RBAC)"
+      - "docs/design/ux/wireframes-bot.md (17)"
+      - "docs/design/ux/wireframes-miniapp.md (10)"
+      - "docs/design/ux/wireframes-admin.md (13 разделов)"
+      - "docs/design/ux/accessibility-checklist.md (WCAG AA + UI-feedback)"
+    ui:
+      - "docs/design/ui/design-system.md"
+      - "docs/design/ui/design-tokens.yaml (27 colors, 12 typography, 4px spacing)"
+      - "docs/design/ui/component-library.md (38 компонентов)"
+      - "docs/design/component-stories-spec.md (rule 08 — Storybook spec)"
+      - "docs/design/ui/visual-language.md (иконография, иллюстрации, анимации)"
+    content:
+      - "docs/design/content/tone-of-voice.md"
+      - "docs/design/content/bot-messages.md (~45)"
+      - "docs/design/content/miniapp-copy.md (12 screens)"
+      - "docs/design/content/admin-notifications.md (22)"
+      - "docs/design/content/error-states.md (25)"
+      - "docs/design/content/law-of-club-draft.md (плейсхолдер + 3 варианта фразы)"
+
+  dependencies_for_next:
+    architecture_phase:
+      - "FSM-машина бота (14 состояний из UX + Business) → backend модель"
+      - "Модель данных calendar (TimeSlot, Booking, Reminder) — DEC-009 свой модуль"
+      - "RBAC система (super/mod/support по DEC-005) → admin views/permissions"
+      - "interface-rules.yaml + visual-regression-config.yaml на базе component-stories-spec"
+      - "AI-оркестрация (DEC-008): match quality feedback, KB usefulness, cost tracking"
+      - "Модели данных match feedback и kb feedback (для tracking из Analytics)"
+      - "Mini-app monorepo / shared components — DEC-UI-005 моно-система"
+      - "i18n: тексты bot/mini-app в RU-файлы (ru as default)"
+
+  blockers:
+    - "OD-CLUB-04/05: финальный текст закона клуба — заблокирован командой"
+    - "Анонимность дарителя в /gift-уведомлении (open question UX→Product)"
+    - "Точные пороги звёзд и формула репутации — OD-CLUB-01/02/03 (workaround: конфигурируемо в админке по DEC-012)"
+    - "SVG иконки/иллюстрации описаны спецификацией, но не нарисованы (задача Phase 6)"
+    - "Точные суммы тарифов в bot-messages.md — sample 150/280 USD не соответствуют PRD (1000/1500). Architect/Coder синхронизирует."
+
+  next_phase: "Phase 5 — Architecture"
+  next_actions:
+    - "Architect → System design, ADRs, tech stack, workspace.dsl"
+    - "Architect → constraints.yaml + dependency-rules.yaml + fitness-functions.yaml"
+    - "Architect/Data → interface-rules.yaml + visual-regression-config.yaml (rule 08)"
+    - "Data → ER-модель, API contracts, OpenAPI"
+    - "Security → threat model (платежи, JWT, webhook, KYC, AI-данные)"

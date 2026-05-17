@@ -1,0 +1,162 @@
+task:
+  id: "TASK-007"
+  file: "TASK-007-content-and-copy.yaml"
+
+  request:
+    agent: "Content"
+    type: "create"
+    priority: "high"
+    created_at: "2026-05-15"
+    phase: "Design"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-004"]
+    checkpoint_ref: "CP-001-discovery-2026-05-15"
+
+    input:
+      summary: |
+        Создать content guide и UX-copy для всех текстов бота, mini-app, админки.
+        Тон «на ты», коротко, дружелюбно. Покрыть все ключевые сообщения:
+        приветствие, оплата, ожидание, закон клуба (черновик), invite, респекты,
+        жалобы, дары, ошибки, поддержка, уведомления админам.
+      references:
+        - "docs/discovery/user-stories.md"
+        - "docs/discovery/business/funnel-process.md"
+        - "docs/discovery/business/respects-complaints-process.md"
+        - "docs/discovery/business/time-economy-process.md"
+        - "docs/discovery/business/payment-process.md"
+        - "context/decisions.yaml"
+      constraints:
+        - "Тон «на ты», дружелюбно, без сухого «вы»"
+        - "Короткие сообщения (≤2 коротких предложения для бота)"
+        - "Emoji — умеренно, не перебарщивать"
+        - "Закон клуба — текст оставить плейсхолдером для команды клуба (US-015 заблокирован OD-CLUB-04/05)"
+        - "Фраза согласия — предложить 2-3 варианта на выбор команды"
+
+    expected_output:
+      deliverables:
+        - "docs/design/content/tone-of-voice.md"
+        - "docs/design/content/bot-messages.md"
+        - "docs/design/content/miniapp-copy.md"
+        - "docs/design/content/admin-notifications.md"
+        - "docs/design/content/error-states.md"
+        - "docs/design/content/law-of-club-draft.md"
+      format: "content_summary"
+      quality_criteria:
+        - "Tone of voice: голос бренда, do/don't, примеры"
+        - "Все сообщения бота (welcome, payment flow, FSM-переходы, invite, support)"
+        - "Все тексты mini-app (профиль, респект, жалоба, /gift, /burn, /match, /ask, digest)"
+        - "Тексты уведомлений админам (новая заявка, оплата, проблемы, late payment, жалоба)"
+        - "Error states (10+ типов ошибок: оплата, webhook, лимит респектов, недостаток дней, KYC и т.д.)"
+        - "Черновик «Закона клуба» с плейсхолдерами для команды + 2-3 варианта фразы согласия"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "~2h"
+    checkpoint_ref: null
+
+    output:
+      summary: |
+        Создан полный content guide для «Клуба 33»: 6 артефактов в docs/design/content/.
+        Покрыты тексты бота (FSM воронки, оплаты, интервью, invite, mini-app helper, /access),
+        тексты mini-app (профиль, респект, /gift, /burn, /match, /ask, digest, жалоба, календарь,
+        empty states), уведомления админам (заявки, оплаты, late payment, жалобы, технические),
+        25 типов error states, черновик «Закона клуба» с 3 вариантами фразы согласия.
+        Тон «на ты», лаконичный, без пафоса; emoji умеренно.
+      artifacts:
+        - path: "docs/design/content/tone-of-voice.md"
+          description: "Голос бренда: 5 атрибутов, Do/Don't, тон под персону, запретные слова, примеры до/после"
+        - path: "docs/design/content/bot-messages.md"
+          description: "Все тексты Telegram-бота по FSM: воронка, оплата (USDT/ЮKassa/СБП), календарь, закон, invite, /access, /help, поддержка"
+        - path: "docs/design/content/miniapp-copy.md"
+          description: "Тексты mini-app: главное меню, профиль, респект, /gift, /burn, /match, /ask, digest, жалоба, календарь, все empty states"
+        - path: "docs/design/content/admin-notifications.md"
+          description: "Уведомления админам в админ-чат: воронка, платежи, интервью, жалобы, технические алерты, утренний дайджест"
+        - path: "docs/design/content/error-states.md"
+          description: "25 типов ошибок с экшен-кнопками: оплата, webhook, лимиты, дары, KYC, AI-down, network, RBAC и др."
+        - path: "docs/design/content/law-of-club-draft.md"
+          description: "Структура закона клуба (Принципы / Правила / Согласие KB / Согласие матчинг) + 3 варианта фразы согласия; TBD-плейсхолдеры для команды клуба"
+      decisions:
+        - id: "DEC-CONTENT-001"
+          decision: "Тон бота — на «ты», максимум 2 коротких предложения в сообщении, 1 emoji"
+          rationale: "Telegram-формат + позиционирование клуба «без пафоса»; короткие сообщения уважают время участника"
+        - id: "DEC-CONTENT-002"
+          decision: "Запретные слова: «уважаемый», «премиум», «VIP», «эксклюзивный», «юзер», «произошла ошибка»"
+          rationale: "Стоп-лист канцелярита и маркетингового сленга, не соответствующего тону клуба"
+        - id: "DEC-CONTENT-003"
+          decision: "Закон клуба: рекомендуем Вариант 2 «Закон клуба прочитал, принимаю, готов вступать» + разрешить свободный ввод (AI-валидация)"
+          rationale: "Соответствует тону «на ты», добавляет ритуала; Вариант 1 как формальный fallback"
+        - id: "DEC-CONTENT-004"
+          decision: "Финальный текст закона клуба остаётся как DRAFT — нужны решения команды (OD-CLUB-04/05) + юр. согласование частей III/IV"
+          rationale: "Юридические части (согласие на KB и AI-матчинг) требуют юриста (152-ФЗ + GDPR); принципы и правила — решение команды клуба"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Tone of voice: passed (голос бренда, Do/Don't, примеры)"
+        - "Все сообщения бота FSM: passed"
+        - "Все тексты mini-app: passed"
+        - "Уведомления админам: passed"
+        - "Error states 10+ типов: passed (25 типов)"
+        - "Черновик закона клуба + 3 варианта фразы согласия: passed"
+
+    issues:
+      - severity: "medium"
+        description: "Финальный текст Закона клуба (US-015) остаётся заблокированным OD-CLUB-04/05"
+        recommendation: "Передать law-of-club-draft.md команде клуба для финализации; согласовать части III/IV с юристом до Phase 6"
+      - severity: "low"
+        description: "Точные суммы тарифов в bot-messages.md (150/280 USD) — для иллюстрации, требуют подтверждения Product/Business-Analyst"
+        recommendation: "Architect Agent: при создании tech-spec на pricing подтянуть актуальные цифры из PRD"
+
+    next_steps:
+      - action: "Передать law-of-club-draft.md команде клуба + юристу"
+        agent: "Orchestrator"
+        priority: "high"
+      - action: "Использовать тексты при создании Storybook stories (component-stories-spec.md)"
+        agent: "UI"
+        priority: "high"
+      - action: "Использовать тексты при wireframes (bot-messages.md + miniapp-copy.md как content map)"
+        agent: "UX"
+        priority: "high"
+      - action: "Hardcode bot/mini-app тексты в i18n-файлах при реализации (RU as default)"
+        agent: "Coder"
+        priority: "medium"
+
+    agent_data:
+      format: "content_summary"
+      content:
+        artifacts_count: 6
+        total_messages_drafted:
+          bot_messages: 45  # FSM-состояния и команды
+          miniapp_screens: 12  # экраны и состояния
+          admin_notifications: 22  # типов уведомлений
+          error_states: 25  # типов ошибок
+        tone:
+          person: "ты"
+          emoji_policy: "≤ 1 emoji per message"
+          max_length_bot: "≤ 2 short sentences"
+          attributes: ["дружелюбный", "лаконичный", "уважительный", "без пафоса", "прямой"]
+        stop_words:
+          - "уважаемый/уважаемая"
+          - "юзер"
+          - "премиум / VIP / эксклюзивный"
+          - "произошла ошибка"
+          - "просим прощения за неудобства"
+        law_of_club:
+          status: "DRAFT — blocked by OD-CLUB-04/05"
+          structure: ["Принципы", "Правила поведения", "Согласие на KB", "Согласие на AI-матчинг"]
+          consent_phrase_variants: 3
+          recommended_variant: "variant_2"
+          legal_review_required: true
+          blockers: ["OD-CLUB-04", "OD-CLUB-05"]
+        ready_for:
+          - "UX Agent — wireframes (content map)"
+          - "UI Agent — component states (real texts in design system)"
+          - "Coder — i18n RU translation file"
+        dependencies:
+          - "Финализация цен (тарифов) в PRD"
+          - "Финализация Закона клуба командой клуба"
+          - "Юридическое согласование частей III, IV закона клуба"
+
+    signature: "Content Agent"

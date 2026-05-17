@@ -1,0 +1,128 @@
+phase_summary:
+  phase: "Discovery"
+  status: "completed"
+  duration: "1 день (параллельное выполнение 4 агентов)"
+  created_at: "2026-05-15"
+  created_by: "Orchestrator Agent"
+
+  key_outcomes:
+    - "Vision определён: NSM = Weekly Active Members с осмысленным действием (Product) / Active Paid Members (Analytics) — нужно согласовать единую NSM на Architecture Gate"
+    - "PRD покрывает §1–§25 ТЗ, 35+ функциональных требований, разбито на 3 фазы"
+    - "52 User Stories в 7 эпиках с Given/When/Then AC и приоритетами P0/P1/P2"
+    - "6 персон (кандидат, участник, lifetime, модератор, админ, основатель)"
+    - "10 конкурентов проанализированы; выявлен рыночный gap: AI-матчинг + RAG + digest + соц-слой в одном продукте"
+    - "TelegramUI (React) рекомендован как UI-kit (подтверждает DEC-006)"
+    - "37 событий в tracking plan, 8 групп метрик, главная воронка + 4 sub-funnels"
+    - "12 бизнес-процессов формализованы со swim-lane; 14 FSM-состояний бота; RBAC-матрица по DEC-005"
+
+  key_decisions:
+    product:
+      - "DEC-P-001: Закон клуба — только ручной ввод фразы (US-015)"
+      - "DEC-P-002: Lifetime не получает напоминаний о продлении"
+      - "DEC-P-003: Lifetime бюджет 33 дня — сброс 1 января 00:00 МСК"
+      - "DEC-P-004: Дар времени — при остатке подписки ≥30 дней"
+    research:
+      - "DEC-R-001: TelegramUI как UI-kit для mini-app"
+      - "DEC-R-002: AI-матчинг с reasoning + feedback loop (Lunchclub)"
+      - "DEC-R-003: RAG с source-цитатами (Perplexity)"
+      - "DEC-R-004: Параметры репутации — конфигурируемые в админке"
+      - "DEC-R-005: Downvote НЕ внедряется"
+    analytics:
+      - "DEC-A-001: NSM = Active Paid Members"
+      - "DEC-A-002: AI cost-per-user/month ≤ $2"
+      - "DEC-A-003: Renewal Rate target дифференцирован: m6≥55%, m12≥70%"
+    business_analyst:
+      - "DEC-BA-001: Защитный остаток 30 дней — для /gift И /burn"
+      - "DEC-BA-002: Продление накапливается к старой end_date (не от даты платежа)"
+      - "DEC-BA-003: Lifetime НЕ может /burn (нет основной подписки)"
+      - "DEC-BA-004: СБП-подтверждение — только Support и Super (по DEC-005)"
+      - "DEC-BA-005: Поздний webhook → late_payment_review (Super), не автозакрытие"
+
+  artifacts:
+    product:
+      - path: "docs/discovery/vision.md"
+        summary: "Проблема, решение, 6 ЦА, KPI, NSM"
+      - path: "docs/discovery/prd.md"
+        summary: "35+ требований по 3 фазам, NFR, Open Decisions, риски"
+      - path: "docs/discovery/user-stories.md"
+        summary: "52 stories в 7 эпиках с Given/When/Then"
+      - path: "docs/discovery/personas.md"
+        summary: "6 персон с целями, болями, поведением"
+    research:
+      - path: "docs/discovery/research/competitive-analysis.md"
+        summary: "10 клубов: Атланты, Эквиум, YPO, EO, Vistage, Lunchclub и др."
+      - path: "docs/discovery/research/references-uxui.md"
+        summary: "TelegramUI, 8 ключевых экранов mini-app"
+      - path: "docs/discovery/research/findings.md"
+        summary: "TOP-5 рекомендаций для PRD"
+    analytics:
+      - path: "docs/discovery/analytics/tracking-plan.md"
+        summary: "37 событий с JSON schema, trigger, owner, phase"
+      - path: "docs/discovery/analytics/metrics-framework.md"
+        summary: "8 групп метрик, дашборды Founder/Product/AI/Moderation"
+      - path: "docs/discovery/analytics/funnel-definition.md"
+        summary: "Главная воронка 9 шагов + 4 sub-funnels"
+    business_analyst:
+      - path: "docs/discovery/business/processes-overview.md"
+        summary: "12 процессов, FSM-карта, RBAC, SLA"
+      - path: "docs/discovery/business/funnel-process.md"
+        summary: "Воронка приёма + продление + 14 FSM-состояний"
+      - path: "docs/discovery/business/respects-complaints-process.md"
+        summary: "Респекты (4 канала), жалобы (анонимность), звёзды 0–4★"
+      - path: "docs/discovery/business/time-economy-process.md"
+        summary: "/gift, /burn, lifetime-бюджет, конвертер"
+      - path: "docs/discovery/business/payment-process.md"
+        summary: "USDT/ЮKassa/СБП, идемпотентность, нестандартные ситуации"
+
+  dependencies_for_next:
+    design_phase:
+      - "User flows из 52 User Stories и Business processes (12 шт.)"
+      - "Wireframes для 8 ключевых экранов mini-app + web-админка"
+      - "Design system с учётом TelegramUI (DEC-R-001/DEC-006)"
+      - "UI-feedback механизм для match quality и KB usefulness (от Analytics)"
+      - "Content/UX-copy с тоном «на ты», тексты уведомлений (от BA next_steps)"
+    architecture_phase:
+      - "Согласовать единую NSM (расхождение Product vs Analytics)"
+      - "FSM-машина бота (14 состояний из BA)"
+      - "Модель данных: events, ai_usage_log, fx_rate_snapshot, late_payment_review"
+      - "RBAC по DEC-005 (super/модератор/support)"
+      - "AI-оркестрация (DEC-008) + cost tracking"
+      - "Calendar: подтвердить club33calendar существует или fallback на Calendly"
+
+  blockers:
+    - blocker: "OD-CLUB-01..03: коэф. деградации, пороги звёзд, механизм неактивности"
+      impact: "Блокирует детальную реализацию Phase 2 (звёзды) — рекомендация Research: сделать конфигурируемым в админке"
+      resolution: "DEC-R-004 даёт workaround: конфигурируемые параметры → не блокирует код, только настройки"
+    - blocker: "OD-CLUB-04/05: текст «Закона клуба» + фраза согласия"
+      impact: "Блокирует Phase 1 (US-015)"
+      resolution: "Запросить у заказчика до Phase 6"
+    - blocker: "Combat-бот не найден в открытых источниках"
+      impact: "Снижает качество референса для mini-app UX"
+      resolution: "Запросить юзернейм/скриншоты у заказчика; альтернативы (Combot, Iris, Karma Reborn) задокументированы"
+    - blocker: "club33calendar существует или нужно разработать"
+      impact: "Влияет на scope Phase 1"
+      resolution: "Architect Agent выясняет на Phase 5; fallback — Calendly"
+    - blocker: "Политика возвратов не определена (BA)"
+      impact: "Юр. риск при первых платежах"
+      resolution: "Product + Architect готовят черновик до Phase 6"
+
+  open_questions:
+    with_club_team:
+      - "Пороги 0★/1★/2★/3★/4★ (или принять DEC-R-004 — конфигурируемо)"
+      - "Коэффициент месячной деградации балла"
+      - "Механизм неактивности (60 дней vs N сообщений)"
+      - "Финальный текст «Закона клуба» + фраза согласия"
+      - "Политика возвратов (full / pro-rated / non-refundable)"
+      - "Серьёзность жалоб (категории) и пенальти"
+    with_developer:
+      - "Combat-бот юзернейм/скриншоты"
+      - "club33calendar существует?"
+      - "N confirmations для USDT TRC20/TON"
+      - "Forex API источник по умолчанию (предложение Orch: ЦБ РФ)"
+
+  next_phase: "Phase 4 — Design"
+  next_actions:
+    - "UX Agent → user flows из User Stories + Business processes"
+    - "UX Agent → wireframes для 8 экранов mini-app + web-админка"
+    - "UI Agent → design system (TelegramUI-based) + component-stories-spec.md"
+    - "Content Agent → UX-copy (тон «на ты», тексты уведомлений)"

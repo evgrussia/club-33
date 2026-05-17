@@ -1,0 +1,87 @@
+checkpoint:
+  id: "CP-002-design-2026-05-15"
+  created_at: "2026-05-15"
+  created_by: "Orchestrator Agent"
+
+  phase: "Design"
+  status: "completed"
+
+  summary: |
+    Phase 4 Design завершена. UX, UI, Content отработали параллельно
+    и создали 17 артефактов: 18 user flows, 40 wireframes (17 bot + 10
+    mini-app + 13 admin), design system из 38 компонентов с design-tokens.yaml,
+    component-stories-spec.md (rule 08), ~104 текста (45 bot + 12 mini-app +
+    22 admin notifications + 25 error states), черновик закона клуба.
+
+    Все ключевые UX-паттерны зафиксированы: Lunchclub match cards,
+    Perplexity RAG footnotes, 3-значный feedback без downvote, скрытие
+    sidebar по RBAC, ручной ввод фразы согласия.
+
+    Готов к Phase 5 — Architecture.
+
+  participating_agents:
+    - agent: "UX"
+      contribution: "18 flows, 40 wireframes, IA, a11y checklist"
+    - agent: "UI"
+      contribution: "Design system, 38 компонентов, tokens.yaml, component-stories-spec, brand"
+    - agent: "Content"
+      contribution: "Tone-of-voice, 45+22+25+12 текстов, закон-черновик"
+    - agent: "Orchestrator"
+      contribution: "Координация, Design summary, checkpoint"
+
+  artifacts: # Список — см. context/summaries/design-summary.yaml
+    - path: "context/summaries/design-summary.yaml"
+      status: "created"
+      summary: "Phase summary Design: 17 артефактов, 17 decisions, blockers"
+
+  decisions:
+    - id: "DEC-014"
+      decision: "Перейти к Phase 5 — Architecture"
+      rationale: "Все Quality Gate критерии Design пройдены: user flows, wireframes, design system, component-stories-spec, a11y. Open questions не блокируют Architecture."
+      stakeholder: "Orchestrator"
+    - id: "DEC-015"
+      decision: "Финальные суммы тарифов синхронизируются Architect-агентом на Phase 5"
+      rationale: "В bot-messages.md Content использовал sample 150/280 USD, в PRD — 1000/1500 USD (из ТЗ). Architect зафиксирует единый источник истины."
+      stakeholder: "Orchestrator"
+
+  tasks:
+    completed_since_last_checkpoint:
+      - "TASK-005"
+      - "TASK-006"
+      - "TASK-007"
+    in_progress: []
+    totals:
+      completed: 7  # cumulative: TASK-001..007
+      in_progress: 0
+      blocked: 0
+      total: 7
+
+  next_actions:
+    - action: "Запустить Phase 5 — Architecture (Architect → System design, ADRs, AaC артефакты)"
+      agent: "Architect"
+      priority: 1
+    - action: "Phase 5 — Data (ER, API contracts, OpenAPI)"
+      agent: "Data"
+      priority: 1
+    - action: "Phase 5 — Security (threat model, JWT, webhook, KYC)"
+      agent: "Security"
+      priority: 2
+    - action: "Phase 5 — AI-Agents (оркестрация Claude по DEC-008)"
+      agent: "AI-Agents"
+      priority: 2
+
+  blockers: # Не блокируют Phase 5 — Architecture
+    - blocker: "Закон клуба DRAFT (OD-CLUB-04/05)"
+      impact: "Влияет только на Phase 6 (US-015 реализация)"
+    - blocker: "SVG иконки/иллюстрации не нарисованы"
+      impact: "Phase 6 — Coder задача"
+
+  metrics:
+    completion_percentage: 100
+    documents_created: 17  # 6 UX + 5 UI + 6 Content
+    decisions_made: 17     # 7 UX + 6 UI + 4 Content
+    components_in_library: 38
+    wireframes_total: 40
+    bot_messages: 45
+    error_states: 25
+    user_flows: 18

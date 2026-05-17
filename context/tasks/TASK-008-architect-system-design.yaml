@@ -1,0 +1,243 @@
+task:
+  id: "TASK-008"
+  file: "TASK-008-architect-system-design.yaml"
+
+  request:
+    agent: "Architect"
+    type: "create"
+    priority: "critical"
+    created_at: "2026-05-16"
+    phase: "Architecture"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-004", "TASK-005"]
+    checkpoint_ref: "CP-002-design-2026-05-15"
+
+    input:
+      summary: |
+        Спроектировать архитектуру «Клуба 33» как Architecture as Code (AaC, rule 05).
+        Покрыть все 3 фазы релиза. Включает: workspace.dsl (C4 модель), constraints.yaml,
+        dependency-rules.yaml, fitness-functions.yaml, ADRs ключевых решений, tech stack,
+        NFR. Также по rule 08 (Interface as Code) — interface-rules.yaml и
+        visual-regression-config.yaml. Финализировать единую NSM (расхождение
+        Product=WAM vs Analytics=APM).
+      references:
+        - "docs/discovery/prd.md"
+        - "docs/discovery/business/processes-overview.md"
+        - "docs/design/ux/information-architecture.md"
+        - "docs/design/component-stories-spec.md"
+        - "context/decisions.yaml"
+        - "context/summaries/design-summary.yaml"
+        - ".claude/rules/05-architecture-as-code.md"
+        - ".claude/rules/08-interface-compliance.md"
+      constraints:
+        - "Tech stack из CLAUDE.md: Django 5 + DRF + React 18 + Vite 6 + PostgreSQL 16 + pgvector + Redis 7"
+        - "Bot: Python aiogram 3.x (если не явное иное)"
+        - "Mini-app monorepo с web-админкой (моно-design-system, DEC-UI-005)"
+        - "AI: только Anthropic (DEC-008) с оркестрацией haiku/sonnet/opus + embeddings"
+        - "Calendar: собственный модуль club33calendar (DEC-009)"
+        - "RBAC: super/модератор/support (DEC-005)"
+        - "ВСЕ изменения в код через TASK request (rule 06-task-persistence + rule 09 DDD)"
+
+    expected_output:
+      deliverables:
+        - "docs/architecture/workspace.dsl"
+        - "docs/architecture/constraints.yaml"
+        - "docs/architecture/dependency-rules.yaml"
+        - "docs/architecture/fitness-functions.yaml"
+        - "docs/architecture/overview.md"
+        - "docs/architecture/c4-diagrams.md"
+        - "docs/architecture/tech-stack.md"
+        - "docs/architecture/nfr-specs.md"
+        - "docs/architecture/adrs/ADR-001-tech-stack.md"
+        - "docs/architecture/adrs/ADR-002-bounded-contexts.md"
+        - "docs/architecture/adrs/ADR-003-ai-orchestration.md"
+        - "docs/architecture/adrs/ADR-004-payments-architecture.md"
+        - "docs/architecture/adrs/ADR-005-calendar-module.md"
+        - "docs/architecture/adrs/ADR-006-rbac-strategy.md"
+        - "docs/architecture/adrs/ADR-007-fsm-bot-state.md"
+        - "docs/architecture/adrs/ADR-008-nsm-finalization.md"
+        - "docs/interface/interface-rules.yaml"
+        - "docs/interface/visual-regression-config.yaml"
+      format: "architecture_summary"
+      quality_criteria:
+        - "workspace.dsl содержит persons, software systems, containers, relationships (C4)"
+        - "Bounded contexts из ADR-002 соответствуют preview из system-adaptation-summary"
+        - "constraints.yaml: layer rules, dependency rules, naming, size — все категории"
+        - "dependency-rules.yaml: allowed_imports для всех backend+frontend модулей"
+        - "fitness-functions.yaml: ≥7 функций с tool, ci_stage, threshold"
+        - "ADR-008: финальная NSM согласована (одна или композитная)"
+        - "interface-rules.yaml + visual-regression-config.yaml созданы (rule 08)"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-16"
+    duration: "~1 рабочий день"
+    checkpoint_ref: null
+
+    output:
+      summary: |
+        Создана полная архитектура «Клуба 33»: AaC-артефакты (workspace.dsl, constraints.yaml,
+        dependency-rules.yaml, fitness-functions.yaml — 13 функций), 8 ADR (tech stack,
+        13 bounded contexts, AI-оркестрация, payments, calendar, RBAC, FSM, NSM),
+        документация (overview, c4-diagrams в Mermaid, tech-stack, nfr-specs).
+        IfaC-артефакты (interface-rules.yaml, visual-regression-config.yaml) созданы.
+        NSM финализирована как композитная «Engaged Active Paid Members» (EAPM) — устраняет
+        расхождение Product (WAM) vs Analytics (APM): требует и активной подписки, и ≥1
+        осмысленного действия (respect/match/ask/digest_open/chat_msg/gift/burn/miniapp_session)
+        за 7 дней.
+
+      artifacts:
+        - path: "docs/architecture/workspace.dsl"
+          description: "Structurizr DSL: 7 persons, main system + 6 external, 8 containers, relationships"
+        - path: "docs/architecture/constraints.yaml"
+          description: "7 layer rules, 6 dependency rules, 6 naming, 5 size, 3 security"
+        - path: "docs/architecture/dependency-rules.yaml"
+          description: "Allowed imports для 14 Django apps + 9 frontend модулей + bot/worker/listener + контексты-события"
+        - path: "docs/architecture/fitness-functions.yaml"
+          description: "13 fitness functions: dependency check, layers, openapi, bundle, coverage, storybook, visual regression, secrets, vulns, AI cost, webhook idempotency"
+        - path: "docs/architecture/overview.md"
+          description: "Высокоуровневый обзор архитектуры"
+        - path: "docs/architecture/c4-diagrams.md"
+          description: "6 Mermaid-диаграмм: SystemContext, Container, Component (Payments), Component (AI), State (FSM), Deployment"
+        - path: "docs/architecture/tech-stack.md"
+          description: "Полный tech stack с версиями и обоснованиями"
+        - path: "docs/architecture/nfr-specs.md"
+          description: "NFR: performance, scalability, availability, security, observability, cost, maintainability, privacy, i18n, a11y"
+        - path: "docs/architecture/adrs/ADR-001-tech-stack.md"
+          description: "Django 5 + DRF + React 18 + Postgres 16 + pgvector + Redis 7 + aiogram + Telethon"
+        - path: "docs/architecture/adrs/ADR-002-bounded-contexts.md"
+          description: "13 контекстов: Identity, Applications, Payments, Subscriptions, Access Control, Calendar, Social, Time Economy, AI Services, Notifications, Admin & Finance, Listener, Audit"
+        - path: "docs/architecture/adrs/ADR-003-ai-orchestration.md"
+          description: "Model router: fast=haiku, smart=sonnet, deep=opus, embedding=voyage-3. Кост-гарддрейл $2/user/мес"
+        - path: "docs/architecture/adrs/ADR-004-payments-architecture.md"
+          description: "Adapter pattern, idempotency by external_id, fx snapshot, ±0.5% tolerance, late_payment_review"
+        - path: "docs/architecture/adrs/ADR-005-calendar-module.md"
+          description: "club33calendar: TimeSlot/Booking/Reminder, fallback Calendly через adapter"
+        - path: "docs/architecture/adrs/ADR-006-rbac-strategy.md"
+          description: "Матрица super/moderator/support + UserAccessLevel; sidebar скрывает по правам (DEC-UX-007)"
+        - path: "docs/architecture/adrs/ADR-007-fsm-bot-state.md"
+          description: "14 состояний, Redis hot + Postgres cold, optimistic transitions, allowed_transitions table"
+        - path: "docs/architecture/adrs/ADR-008-nsm-finalization.md"
+          description: "NSM = Engaged Active Paid Members (composite); APM остаётся как финансовая метрика"
+        - path: "docs/interface/interface-rules.yaml"
+          description: "8 API rules + 9 UI rules + workflow изменения контракта"
+        - path: "docs/interface/visual-regression-config.yaml"
+          description: "Playwright config, 19 pages (10 miniapp + 9 admin) + 15 components, defaults 2%"
+
+      decisions:
+        - id: "DEC-ARCH-001"
+          decision: "13 bounded contexts (вместо 10 в preview)"
+          rationale: "Добавлены Calendar (DEC-009), Listener (отдельный процесс), Audit (rule 04) — каждый имеет уникальный жизненный цикл и зависимости"
+        - id: "DEC-ARCH-002"
+          decision: "NSM = Engaged Active Paid Members (composite)"
+          rationale: "Устраняет конфликт Product/Analytics; учитывает и платёж, и engagement; защищает от «зомби-подписок»"
+        - id: "DEC-ARCH-003"
+          decision: "Single monolith Django (а не микросервисы)"
+          rationale: "Команда мала, нагрузка Y1 1-5k users, monolith проще. Bounded contexts = Django apps. Listener — отдельный процесс (читает MTProto)"
+        - id: "DEC-ARCH-004"
+          decision: "FSM state двойное хранение: Redis (hot) + Postgres (cold)"
+          rationale: "Production-grade устойчивость к рестарту Redis + аналитика воронки"
+        - id: "DEC-ARCH-005"
+          decision: "Payments via Adapter pattern с идемпотентностью по external_id"
+          rationale: "Расширяемость (новые провайдеры) + защита от повторных webhook"
+        - id: "DEC-ARCH-006"
+          decision: "Forex: ЦБ РФ XML по умолчанию"
+          rationale: "DEC-010 sub-question; бесплатно, надёжно, рыночно-репрезентативно"
+        - id: "DEC-ARCH-007"
+          decision: "AI cost guardrail через ai_usage_log + daily aggregation"
+          rationale: "DEC-A-002 требует ≤ $2/user/мес; нужны прозрачные метрики и алерты"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "workspace.dsl содержит persons, software systems, containers, relationships: passed"
+        - "Bounded contexts из ADR-002 соответствуют preview (10 → расширены до 13): passed"
+        - "constraints.yaml: все 5 категорий (layer, dependency, naming, size, security): passed"
+        - "dependency-rules.yaml: backend + frontend + bot + worker + listener + контракты: passed"
+        - "fitness-functions.yaml: 13 функций ≥ требуемых 7: passed"
+        - "ADR-008: финальная композитная NSM согласована и обоснована: passed"
+        - "interface-rules.yaml + visual-regression-config.yaml созданы по rule 08: passed"
+
+      open_for_next_agents:
+        data_agent:
+          - "ER-модель и Django migrations для всех 13 контекстов"
+          - "Конкретные поля моделей (Invoice, Subscription, Respect, Booking, AiUsageLog и др.)"
+          - "OpenAPI 3.1 schema (drf-spectacular) → docs/interface/openapi.yaml"
+          - "Event storming с конкретными payload событий"
+          - "Индексы pgvector (ivfflat parameters), Postgres performance indexes"
+        security_agent:
+          - "STRIDE threat model на основе workspace.dsl"
+          - "OWASP Top-10 checklist для DRF/React"
+          - "Детальный security для payments webhook, JWT init_data, Listener consent"
+          - "Secrets management strategy (env, vault?)"
+          - "GDPR/privacy для Listener-индексации чата"
+        ai_agents:
+          - "Конкретные prompts для match/ask/digest"
+          - "RAG pipeline (chunking, retrieval, reranking)"
+          - "model-router.md — реализация маршрутизации"
+          - "Кэш-стратегия ответов /ask"
+          - "Quality feedback loop с MatchFeedback/KbFeedback"
+
+    issues:
+      - severity: "low"
+        description: "USDT-провайдер конкретно не выбран (TRC20 vs TON)"
+        recommendation: "Security/Data Agent или DevOps выберет провайдера в Phase 5-8 на основе комиссий, доступности webhook"
+      - severity: "low"
+        description: "Конкретная формула репутации и пороги звёзд не зафиксированы"
+        recommendation: "Заблокировано командой клуба (OD-CLUB-01/02/03). Workaround: конфигурируемо в админке (DEC-012)"
+      - severity: "medium"
+        description: "Listener consent flow требует чёткого согласия в законе клуба"
+        recommendation: "Content Agent + юристы финализируют текст; Security Agent опишет privacy implications"
+
+    next_steps:
+      - action: "Реализовать ER-модель и OpenAPI (TASK-009)"
+        agent: "Data"
+        priority: "high"
+      - action: "STRIDE threat model (TASK-010)"
+        agent: "Security"
+        priority: "high"
+      - action: "AI orchestration детали и prompts (TASK-011)"
+        agent: "AI-Agents"
+        priority: "high"
+      - action: "Architecture Gate — утверждение пользователем"
+        agent: "Orchestrator"
+        priority: "high"
+      - action: "Phase 5.5 DDD Agent Generation (после Architecture Gate)"
+        agent: "Orchestrator"
+        priority: "medium"
+
+    agent_data:
+      format: "architecture_summary"
+      content:
+        bounded_contexts_count: 13
+        adrs_count: 8
+        fitness_functions_count: 13
+        containers_count: 8
+        external_systems_count: 6
+        constraints_categories: 5
+        nsm_decision: "Engaged Active Paid Members (EAPM) — composite"
+        nsm_formula: "COUNT(DISTINCT user) WHERE access_status IN (active, lifetime_active) AND joined_channel_at IS NOT NULL AND has_meaningful_action_in_last_7_days = TRUE"
+        meaningful_actions_count: 8
+        tech_stack_summary:
+          backend: "Django 5 + DRF + Python 3.12"
+          frontend: "React 18 + Vite 6 + TypeScript + TelegramUI"
+          bot: "aiogram 3.x"
+          listener: "Telethon (MTProto)"
+          db: "PostgreSQL 16 + pgvector"
+          cache: "Redis 7"
+          scheduler: "APScheduler"
+          ai: "Anthropic Claude (haiku/sonnet/opus) + voyage-3 embeddings 1536 dim"
+          payments: ["ЮKassa", "USDT TRC20/TON", "СБП ручная"]
+          forex: "ЦБ РФ XML"
+          infra: "Docker + Nginx + Ubuntu 24.04 LTS + GitHub Actions"
+        aac_artifacts:
+          - "workspace.dsl"
+          - "constraints.yaml"
+          - "dependency-rules.yaml"
+          - "fitness-functions.yaml"
+        ifac_artifacts:
+          - "interface-rules.yaml"
+          - "visual-regression-config.yaml"
+
+    signature: "Architect Agent"

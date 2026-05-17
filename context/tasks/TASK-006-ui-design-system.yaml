@@ -1,0 +1,214 @@
+task:
+  id: "TASK-006"
+  file: "TASK-006-ui-design-system.yaml"
+
+  request:
+    agent: "UI"
+    type: "create"
+    priority: "critical"
+    created_at: "2026-05-15"
+    phase: "Design"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-002"]
+    checkpoint_ref: "CP-001-discovery-2026-05-15"
+
+    input:
+      summary: |
+        Создать design system «Клуба 33»: design tokens, UI kit, типографика,
+        палитра, иконки, состояния компонентов. Основа — TelegramUI (DEC-R-001/
+        DEC-006). Подготовить component-stories-spec.md (по rule 08-interface-compliance)
+        — спецификация всех компонентов со states и props.
+      references:
+        - "docs/discovery/research/references-uxui.md"
+        - "docs/discovery/personas.md"
+        - "context/decisions.yaml"
+        - ".claude/rules/08-interface-compliance.md"
+      constraints:
+        - "TelegramUI как UI-kit (React) — переиспользовать компоненты"
+        - "Поддержка Telegram theme params (light/dark, accent color)"
+        - "Haptic Feedback для критичных действий"
+        - "Native MainButton / BackButton — обязательно"
+        - "WCAG AA контрастность"
+        - "Mini-app + web-админка делят дизайн-токены (моно-design-system)"
+
+    expected_output:
+      deliverables:
+        - "docs/design/ui/design-system.md"
+        - "docs/design/ui/design-tokens.yaml"
+        - "docs/design/ui/component-library.md"
+        - "docs/design/component-stories-spec.md"
+        - "docs/design/ui/visual-language.md"
+      format: "ui_summary"
+      quality_criteria:
+        - "Design tokens (colors, spacing, typography, radii, shadows) в YAML"
+        - "Component library: Button, Input, Card, Cell, Section, Avatar, Badge (звёзды), Modal, Sheet, List, Empty State, Loading, Error"
+        - "Каждый компонент: variants, states (default/loading/error/empty/disabled), props"
+        - "Brand identity для «Клуба 33» (название, тон, визуальный язык)"
+        - "Иконография: Telegram-style (outline) + custom для респектов/дней"
+        - "component-stories-spec.md — обязательно (rule 08-interface-compliance §UI Agent)"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "single session"
+    checkpoint_ref: "CP-001-discovery-2026-05-15"
+
+    output:
+      summary: |
+        Создана design system «Клуба 33»: 5 артефактов, 38 компонентов с states/props,
+        машиночитаемые tokens (colors light/dark, typography, spacing 4px-grid, radii,
+        shadows, animations), brand identity с золотым акцентом #C9A24A, кастомные
+        иконки для домен-механик (звёзды, респекты, дни, lifetime). Подготовлена
+        component-stories-spec.md (обязательно по rule 08-interface-compliance) —
+        источник истины для Storybook в Phase 6.
+      artifacts:
+        - path: "docs/design/ui/design-system.md"
+          description: "Философия, brand identity, палитра, типографика, accessibility"
+        - path: "docs/design/ui/design-tokens.yaml"
+          description: "Машиночитаемые design tokens (colors/typography/spacing/radii/shadows/animations)"
+        - path: "docs/design/ui/component-library.md"
+          description: "Каталог 38 компонентов (atomic, cells, composite, specific, layout, admin) с variants/states/props"
+        - path: "docs/design/component-stories-spec.md"
+          description: "Спецификация stories для Storybook (rule 08-interface-compliance)"
+        - path: "docs/design/ui/visual-language.md"
+          description: "Иллюстрации, иконография, анимации, choreography состояний"
+      decisions:
+        - id: "DEC-UI-001"
+          decision: "Primary brand color — тёплый золотой #C9A24A (light) / #E6BC5E (dark)"
+          rationale: "Отсылка к Юпитеру/звёздам/ценности; используется точечно — звёзды, lifetime, главные CTA; не конфликтует с themeParams (нейтральный фон Telegram)"
+        - id: "DEC-UI-002"
+          decision: "TelegramUI как база UI-kit + кастомные обёртки для доменных компонентов"
+          rationale: "Соответствует DEC-R-001/DEC-006; native-feel; экономия времени; темизация через themeParams автоматическая"
+        - id: "DEC-UI-003"
+          decision: "Tabler Icons как базовый icon-set + 10 кастомных иконок для домена"
+          rationale: "Open-source MIT, line-style 24px/stroke 2, совместимо с Telegram-стилем; кастомные — для уникальных механик (respect, gift-day, lifetime, pulse, match, kb-quote)"
+        - id: "DEC-UI-004"
+          decision: "Confetti на респект ОТКЛОНЕНО, используем мягкую pulse-анимацию 300ms + haptic.success"
+          rationale: "Confetti слишком игрив для тона зрелого клуба; pulse + haptic — достаточная обратная связь"
+        - id: "DEC-UI-005"
+          decision: "Моно-дизайн-система для mini-app и web-админки (один набор tokens)"
+          rationale: "DEC-006 единый стек React+Vite; различаются только плотностью (hit-area 44px mobile vs 32-40px desktop); упрощает поддержку"
+        - id: "DEC-UI-006"
+          decision: "Lottie/3D/glassmorphism/neumorphism запрещены"
+          rationale: "Поддержание flat-Telegram-стиля; performance в mini-app (<300ms latency budget); консистентность"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Design tokens (colors light/dark, spacing, typography, radii, shadows, animations) в YAML: passed"
+        - "Component library: 38 компонентов с variants, states, props: passed"
+        - "Каждый компонент покрыт states (default/loading/error/empty/disabled): passed"
+        - "Brand identity (название, тон, golden accent, метафоры): passed"
+        - "Иконография: Tabler base + 10 custom (respect, day, gift-day, lifetime, pulse, complaint, match, kb-quote, star-filled/half/empty): passed"
+        - "component-stories-spec.md создан с required stories для каждого компонента (rule 08 §UI Agent): passed"
+        - "WCAG AA контрастность проверена (text on bg: 18.5:1 light / 17.2:1 dark): passed"
+        - "Telegram theme params mapping определён (7 параметров): passed"
+        - "Haptic Feedback дисциплина определена: passed"
+        - "Native MainButton/BackButton обязательны (зафиксировано): passed"
+
+    issues:
+      - severity: "low"
+        description: "Кастомные иконки клуба (respect, day, lifetime и др.) описаны спецификацией, но SVG не нарисованы — это работа Coder Agent в Phase 6"
+        recommendation: "Координировать с дизайнером (если будет) или нарисовать в SVG editor по спецификации §4.2 visual-language.md"
+      - severity: "low"
+        description: "Иллюстрации для onboarding/empty-states описаны словесно, не нарисованы"
+        recommendation: "Нарисовать в Phase 6 (Coder/Designer) по спецификации §2 visual-language.md (line-style, 200×200, currentColor + accent)"
+      - severity: "medium"
+        description: "Точный текст «Закона клуба» — остаётся открытым вопросом (см. project-brief open_questions)"
+        recommendation: "Content Agent (TASK-007) подготовит черновик; основатель утверждает финальный"
+
+    next_steps:
+      - action: "Content Agent: UX copy + черновик закона клуба (TASK-007)"
+        agent: "Content"
+        priority: "high"
+      - action: "UX Agent: wireframes используют tokens и компоненты (TASK-005 в работе)"
+        agent: "UX"
+        priority: "high"
+      - action: "Architect Agent (Phase 5): определит interface-rules.yaml и visual-regression-config.yaml"
+        agent: "Architect"
+        priority: "medium"
+      - action: "Coder Agent (Phase 6): реализация компонентов + .stories.jsx по component-stories-spec.md"
+        agent: "Coder"
+        priority: "high"
+
+    agent_data:
+      format: "ui_summary"
+      content:
+        brand:
+          name: "Клуб 33"
+          primary_color: "#C9A24A (light) / #E6BC5E (dark)"
+          metaphors: ["звезда", "рукопожатие", "песочные часы", "пульс"]
+          voice: "на «ты», дружелюбно, коротко, без бюрократии"
+        design_tokens:
+          colors_total: 27        # system + neutrals + domain
+          colors_with_dark_variants: true
+          telegram_theme_params_mapped: 7
+          spacing_scale: "4px grid (0, 2, 4, 8, 12, 16, 24, 32, 48 px)"
+          typography_scale: 12    # display, h1-h5, body, body_compact, subhead, caption, caption_small, code
+          font_family: "system (-apple-system, BlinkMacSystemFont, SF Pro Text, ...)"
+          radii: 6                # none, sm, md, lg, xl, full
+          shadows: 5              # none, sm, md, lg, xl + focus_ring (light/dark variants)
+          animations:
+            durations: ["0ms", "150ms", "250ms", "400ms"]
+            easings: ["standard", "decelerate", "accelerate"]
+            named_presets: 7
+            confetti_disabled: true
+        component_library:
+          total: 38
+          by_category:
+            atomic: 11           # Button, Input, Textarea, Checkbox, Switch, Avatar, Badge, Tag, Star, Icon, Spinner
+            cells_sections: 4    # Cell, Section, ListItem, MenuItem
+            composite: 5         # Card, Sheet, Modal, Toast, Alert
+            specific_domain: 8   # RespectButton, GiftSlider, MatchCard, KBAnswerCard, ComplaintForm, BookingSlot, FunnelChart, LifetimeBadge
+            layout: 5            # Header, Tabs, EmptyState, ErrorState, LoadingState/Skeleton
+            admin: 5             # DataTable, FilterBar, ExportButton, KPICard, ChartCard
+          based_on: "TelegramUI (React) + кастомные обёртки"
+        iconography:
+          base_set: "Tabler Icons (MIT, line-style 24px, stroke 2)"
+          custom_icons: 10
+          custom_icon_list:
+            - "star-filled / star-half / star-empty (3)"
+            - "respect, respect-given"
+            - "day, gift-day"
+            - "lifetime (золотой gradient)"
+            - "pulse (digest)"
+            - "complaint, match, kb-quote"
+        accessibility:
+          wcag_level: "AA"
+          contrast_text_on_bg_light: "18.5:1"
+          contrast_text_on_bg_dark: "17.2:1"
+          min_touch_target_mobile: "44px"
+          min_touch_target_desktop: "32px"
+          focus_ring: "2px accent"
+          reduce_motion_supported: true
+        platform_constraints:
+          telegram_native_buttons: ["MainButton (обязательно для главного CTA в mini-app)", "BackButton (обязательно для навигации)"]
+          haptic_discipline:
+            - "light — на тапах кнопок"
+            - "medium — на ответственных действиях (открытие подтверждения)"
+            - "success — на успешном завершении (респект, оплата, gift)"
+            - "error — на ошибках"
+          themeParams_mapping: 7
+          performance_targets:
+            tti: "< 1.5s on 4G"
+            interaction_response: "< 300ms"
+        stories_spec:
+          total_components_with_required_stories: 38
+          minimum_states_per_component: ["Default", "Loading", "Error", "Empty (если контейнер)", "Disabled (если применимо)", "AllVariants"]
+          rule_compliance: "rule 08-interface-compliance §UI Agent — passed"
+        risks:
+          - severity: "medium"
+            risk: "Текст «Закона клуба» остаётся открытым (требует решения основателя)"
+            mitigation: "Content Agent готовит черновик в TASK-007"
+          - severity: "low"
+            risk: "Кастомные SVG-иконки и иллюстрации описаны спецификацией, но не нарисованы"
+            mitigation: "Нарисовать в Phase 6 по спецификации (Coder или приглашённый дизайнер)"
+          - severity: "low"
+            risk: "Производительность mini-app на старых Android при использовании Tabler Icons (38 компонентов)"
+            mitigation: "Tree-shaking icons import, code-splitting по экранам в Phase 6"
+          - severity: "low"
+            risk: "Расхождение themeParams в нестандартных клиентах Telegram"
+            mitigation: "Fallback-цвета зафиксированы в design-tokens.yaml для всех keys"
+
+    signature: "UI Agent"

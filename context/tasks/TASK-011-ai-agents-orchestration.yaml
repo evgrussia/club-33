@@ -1,0 +1,194 @@
+task:
+  id: "TASK-011"
+  file: "TASK-011-ai-agents-orchestration.yaml"
+
+  request:
+    agent: "AI-Agents"
+    type: "create"
+    priority: "high"
+    created_at: "2026-05-16"
+    phase: "Architecture"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-003"]
+    checkpoint_ref: "CP-002-design-2026-05-15"
+
+    input:
+      summary: |
+        Спроектировать AI-подсистему «Клуба 33» (Phase 2): матчинг (/match) с reasoning
+        + feedback, база знаний RAG (/ask) с цитатами, еженедельный digest (/digest),
+        Listener-бот для индексации чата. Оркестрация моделей Anthropic (DEC-008):
+        haiku-4-5 / sonnet-4-6 / opus-4-7 + embeddings. Контроль cost: ≤$2 user/мес
+        (target Analytics).
+      references:
+        - "docs/discovery/prd.md (раздел §15 AI)"
+        - "docs/discovery/analytics/metrics-framework.md"
+        - "docs/discovery/research/findings.md (Lunchclub/Perplexity)"
+        - "docs/design/ux/wireframes-miniapp.md (карточки /match и /ask)"
+        - "context/decisions.yaml (DEC-008 AI orchestration, DEC-R-002/R-003)"
+      constraints:
+        - "Только Anthropic SDK (можно LangChain поверх для RAG)"
+        - "Embeddings 1536 dim → pgvector"
+        - "Reasoning + feedback loop в /match (Lunchclub)"
+        - "Source-цитаты в /ask (Perplexity)"
+        - "Cost cap per user/month ≤ $2"
+        - "Listener-бот: индексация по подписи в законе клуба"
+        - "Prompt injection защита (Security TASK-010)"
+
+    expected_output:
+      deliverables:
+        - "docs/architecture/ai/ai-architecture.md"
+        - "docs/architecture/ai/matching-system.md"
+        - "docs/architecture/ai/rag-system.md"
+        - "docs/architecture/ai/digest-system.md"
+        - "docs/architecture/ai/model-router.md"
+        - "docs/architecture/ai/cost-tracking.md"
+        - "docs/architecture/ai/prompts-library.md"
+      format: "ai_agents_summary"
+      quality_criteria:
+        - "Архитектура AI-подсистемы (диаграммы потоков)"
+        - "Матчинг: pipeline (запрос → embeddings → vector search → rerank → reasoning)"
+        - "RAG: pipeline (KB index → query → retrieval → answer + citations)"
+        - "Digest: cron-стратегия + summarization-промпты"
+        - "Model router: правила выбора haiku/sonnet/opus по cost+quality"
+        - "Cost tracking: ai_usage_log структура, дашборд, alerts"
+        - "Prompts library: системные промпты с защитой от injection"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-16"
+    duration: "~1 рабочий день"
+    checkpoint_ref: "CP-002-design-2026-05-15"
+
+    output:
+      summary: |
+        Спроектирована AI-подсистема «Клуба 33» (Phase 2): 4 сервиса (Matching, RAG/KB,
+        Digest, Listener) на стеке Anthropic SDK + LangChain (опционально). Embeddings
+        1536d → pgvector. Model Router (DEC-008): Haiku 4.5 (fast/classify) / Sonnet 4.6
+        (rerank/RAG/digest MAP) / Opus 4.7 (digest REDUCE high-impact). Cost-модель
+        укладывается в $2/user/мес ($1.13 на 100 active users, резерв 40%). Защита от
+        prompt-injection в каждом системном промпте, sanitization PII, consent-индексация
+        Listener'ом. ai_usage_log + дашборд + caps (per user $2 soft / $3 hard, per feature
+        daily). Library из 7 системных промптов с JSON-schemas.
+      artifacts:
+        - path: "docs/architecture/ai/ai-architecture.md"
+          description: "Обзорная архитектура AI-подсистемы: стек, слои, диаграммы потоков, кэширование, cost-модель"
+        - path: "docs/architecture/ai/matching-system.md"
+          description: "Pipeline /match: embedding → vector search → rerank → reasoning + feedback loop"
+        - path: "docs/architecture/ai/rag-system.md"
+          description: "Listener-индексация + RAG-pipeline /ask с цитатами (Perplexity-style)"
+        - path: "docs/architecture/ai/digest-system.md"
+          description: "Weekly digest cron + map-reduce summarization + публикация в чат и mini-app"
+        - path: "docs/architecture/ai/model-router.md"
+          description: "Реализация DEC-008: правила выбора моделей, fallback, конфиг, контракт AIClient"
+        - path: "docs/architecture/ai/cost-tracking.md"
+          description: "ai_usage_log структура, дашборды, caps per user / per feature, alerts, anomaly detection"
+        - path: "docs/architecture/ai/prompts-library.md"
+          description: "7 системных промптов (match, kb, digest map/reduce, law consent, complaint classify, bot reply) с защитой от injection и JSON-schemas"
+      decisions:
+        - id: "DEC-AI-001"
+          decision: "Embedding-провайдер voyage-3 (1536d) как основной кандидат, Anthropic embeddings — альтернатива на Phase 5"
+          rationale: "Лучшее retrieval-качество для RU/EN на момент проектирования; финальный выбор делает Architect Agent"
+        - id: "DEC-AI-002"
+          decision: "Listener индексирует только сообщения с consent=true (law_of_club подписан)"
+          rationale: "Privacy + соответствие закону клуба; реализация через MTProto Telethon"
+        - id: "DEC-AI-003"
+          decision: "Matching rerank НЕ кэшируется; KB answer кэшируется на 6 часов по нормализованному query"
+          rationale: "Matching персонализирован под user+pool state; KB допускает дедупликацию"
+        - id: "DEC-AI-004"
+          decision: "Cost cap per user: soft $1.50 / warn $2.00 / hard block $3.00 в месяц"
+          rationale: "Метрика Analytics 'Cost per User per Month ≤ $2' + защита от runaway-стоимости одиночного юзера"
+        - id: "DEC-AI-005"
+          decision: "Digest REDUCE использует Opus 4.7 только при high_impact неделе, иначе Sonnet 4.6"
+          rationale: "Опус дороже в 5×, нужен только для сложного синтеза; обычные недели — Sonnet"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Архитектура AI-подсистемы (диаграммы потоков): passed (Mermaid в ai-architecture.md)"
+        - "Матчинг pipeline: passed (matching-system.md §1)"
+        - "RAG pipeline: passed (rag-system.md §2 + Listener §1)"
+        - "Digest cron + map-reduce: passed (digest-system.md §1–§5)"
+        - "Model router DEC-008: passed (model-router.md §2–§3)"
+        - "Cost tracking ai_usage_log + дашборд + alerts: passed (cost-tracking.md)"
+        - "Prompts library с защитой от injection: passed (prompts-library.md — 7 промптов + чек-лист)"
+
+    issues:
+      - severity: "medium"
+        description: "Финальный выбор embedding-провайдера (voyage-3 vs Anthropic emb) отложен до Phase 5"
+        recommendation: "Architect Agent в TASK-008 принимает решение через ADR-AI-EMB; абстракция EmbeddingProvider уже заложена в архитектуру"
+      - severity: "low"
+        description: "Точная формулировка фразы согласия (CLUB_CONSENT_PHRASE) пока не финализирована (open question с командой клуба)"
+        recommendation: "Когда финализирована — задать в ENV; LAW_CONSENT_VALIDATION_PROMPT не требует изменений"
+      - severity: "low"
+        description: "Цены моделей Anthropic в model-router.md §5 — placeholder, обновить по факту на момент запуска Phase 2"
+        recommendation: "DevOps Agent поддерживает ai_model_pricing.yaml в Phase 8"
+
+    next_steps:
+      - action: "Architect Agent: учесть AI-артефакты в workspace.dsl (AI container) + ADR-AI-001 (provider lock-in)"
+        agent: "Architect"
+        priority: "high"
+      - action: "Data Agent: спроектировать схемы member_profiles, kb_chunks, chat_messages, match_log, kb_log, daily_summaries, ai_usage_log по описанным в документах структурам"
+        agent: "Data"
+        priority: "high"
+      - action: "Security Agent: ревью prompts-library на полноту защиты от injection + аудит PII-санитизации"
+        agent: "Security"
+        priority: "high"
+
+    agent_data:
+      format: "ai_agents_summary"
+      content:
+        services:
+          matching:
+            target_latency_p95_sec: 5
+            target_cost_per_request_usd: 0.05
+            target_quality_pct: 60
+            target_ctr_pct: 15
+            models: ["MODEL_EMBEDDING", "MODEL_SMART"]
+            cache: false
+          rag:
+            target_latency_p95_sec: 8
+            target_cost_per_request_usd: 0.08
+            target_recall_pct: 70
+            target_coverage_pct: 90
+            models: ["MODEL_EMBEDDING", "MODEL_SMART"]
+            cache_ttl_hours: 6
+          digest:
+            cadence: "weekly Monday 09:00 MSK"
+            target_cost_per_week_usd: 0.50
+            models: ["MODEL_SMART", "MODEL_DEEP (high_impact)"]
+          listener:
+            consent_required: true
+            chunk_size_tokens: 1024
+            overlap_tokens: 128
+            target_cost_per_month_usd: 0.75
+        model_router:
+          decision_ref: "DEC-008"
+          aliases:
+            MODEL_FAST: "claude-haiku-4-5"
+            MODEL_SMART: "claude-sonnet-4-6"
+            MODEL_DEEP: "claude-opus-4-7"
+            MODEL_EMBEDDING: "voyage-3 (TBD)"
+          fallback_supported: true
+        cost_model:
+          per_user_per_month_target_usd: 2.0
+          per_user_soft_warn_usd: 1.50
+          per_user_hard_block_usd: 3.00
+          expected_total_100_users_usd: 113
+        prompts:
+          count: 7
+          injection_protection: "block in each prompt + user-role data segregation + JSON schemas"
+          list:
+            - "MATCH_RERANK_PROMPT"
+            - "KB_ANSWER_PROMPT"
+            - "DIGEST_MAP_PROMPT"
+            - "DIGEST_REDUCE_PROMPT"
+            - "LAW_CONSENT_VALIDATION_PROMPT"
+            - "COMPLAINT_CLASSIFY_PROMPT"
+            - "BOT_REPLY_PROMPT"
+        risks_top3:
+          - "Prompt-injection через тексты профилей/сообщений чата (mitigation: защитные блоки в каждом промпте + PII-санитизация + JSON-schemas)"
+          - "Cost overrun из-за rerank Sonnet'а или нестандартных длинных запросов (mitigation: per-user/per-feature caps, anomaly alerts, fallback на Haiku, daily canary)"
+          - "Latency p95 не уложится в 5/8 сек на пиковой нагрузке (mitigation: streaming Sonnet, HNSW index tuning, async pipeline, кэш query embeddings)"
+
+    signature: "AI-Agents Agent"

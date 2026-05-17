@@ -1,0 +1,897 @@
+# ---
+# title: "OpenAPI 3.1 — Клуб 33 REST API"
+# created_by: "Data Agent"
+# created_at: "2026-05-16"
+# version: "1.0"
+# phase: "Architecture"
+# ---
+openapi: 3.1.0
+info:
+  title: Клуб 33 API
+  version: "1.0.0"
+  description: |
+    REST API для Telegram mini-app, web-админки, и webhook-провайдеров (ЮKassa, USDT).
+    Аутентификация — JWT, выдаётся по Telegram init_data. Все ответы — JSON.
+    Все эндпоинты под `/api/v1/`.
+  contact:
+    name: Клуб 33 Team
+servers:
+  - url: https://api.club33.example.com
+    description: Production
+  - url: https://staging.api.club33.example.com
+    description: Staging
+
+tags:
+  - name: auth
+    description: Аутентификация mini-app
+  - name: me
+    description: Профиль и подписка участника
+  - name: payments
+    description: Инвойсы и статусы платежей
+  - name: webhooks
+    description: Webhook от провайдеров платежей
+  - name: respects
+    description: Респекты (Phase 2)
+  - name: complaints
+    description: Жалобы (Phase 2)
+  - name: time-economy
+    description: Дар времени, сжигание (Phase 3)
+  - name: ai
+    description: AI-матчинг, KB, digest
+  - name: calendar
+    description: Слоты интервью, бронирования
+  - name: law
+    description: Принятие закона клуба
+  - name: admin
+    description: Админ-эндпоинты (RBAC)
+
+security:
+  - BearerAuth: []
+
+paths:
+  # ===== AUTH =====
+  /api/v1/auth/telegram:
+    post:
+      tags: [auth]
+      security: []
+      summary: Обменять Telegram init_data на JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [init_data]
+              properties:
+                init_data:
+                  type: string
+                  description: Telegram WebApp init_data (raw)
+      responses:
+        '200':
+          description: JWT и базовый профиль
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  refresh_token: { type: string }
+                  expires_in: { type: integer }
+                  user: { $ref: '#/components/schemas/UserBrief' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ===== ME =====
+  /api/v1/me:
+    get:
+      tags: [me]
+      summary: Профиль текущего участника
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { $ref: '#/components/schemas/MemberProfile' } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    patch:
+      tags: [me]
+      summary: Обновить bio/competencies/interests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bio: { type: string }
+                competencies: { type: string }
+                interests: { type: string }
+      responses:
+        '200': { description: Updated, content: { application/json: { schema: { $ref: '#/components/schemas/MemberProfile' } } } }
+
+  /api/v1/me/subscription:
+    get:
+      tags: [me]
+      summary: Статус подписки текущего пользователя
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { $ref: '#/components/schemas/Subscription' } } }
+
+  # ===== PAYMENTS =====
+  /api/v1/payments/invoice:
+    post:
+      tags: [payments]
+      summary: Создать инвойс на оплату подписки
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tariff, method]
+              properties:
+                tariff: { type: string, enum: [p6m, p12m, lifetime] }
+                method: { type: string, enum: [usdt_trc20, usdt_ton, sbp, yookassa_card] }
+      responses:
+        '201':
+          description: Created
+          content: { application/json: { schema: { $ref: '#/components/schemas/Payment' } } }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/v1/payments/{id}:
+    get:
+      tags: [payments]
+      summary: Статус платежа
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { $ref: '#/components/schemas/Payment' } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ===== WEBHOOKS =====
+  /api/v1/webhooks/yookassa:
+    post:
+      tags: [webhooks]
+      security: []
+      summary: Webhook ЮKassa (HMAC сигнатура в заголовке)
+      parameters:
+        - name: X-Signature
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses:
+        '200': { description: Accepted (idempotent) }
+        '400': { description: Invalid signature or payload }
+
+  /api/v1/webhooks/usdt:
+    post:
+      tags: [webhooks]
+      security: []
+      summary: Webhook USDT-провайдера (TRC20/TON)
+      parameters:
+        - name: X-Provider
+          in: header
+          required: true
+          schema: { type: string, enum: [trc20, ton] }
+        - name: X-Signature
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content: { application/json: { schema: { type: object, additionalProperties: true } } }
+      responses:
+        '200': { description: Accepted (idempotent) }
+        '400': { description: Invalid signature or payload }
+
+  # ===== LAW =====
+  /api/v1/law/accept:
+    post:
+      tags: [law]
+      summary: Принять закон клуба (вводом фразы)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phrase, accepted_kb_indexing]
+              properties:
+                phrase: { type: string }
+                accepted_kb_indexing: { type: boolean }
+      responses:
+        '200': { description: Accepted, content: { application/json: { schema: { $ref: '#/components/schemas/LawAcceptance' } } } }
+        '400': { description: Phrase mismatch }
+
+  # ===== CALENDAR =====
+  /api/v1/calendar/slots:
+    get:
+      tags: [calendar]
+      summary: Свободные слоты интервью
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date-time } }
+        - { name: to, in: query, schema: { type: string, format: date-time } }
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/TimeSlot' } } } }
+
+  /api/v1/calendar/bookings:
+    post:
+      tags: [calendar]
+      summary: Забронировать слот
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slot_id]
+              properties:
+                slot_id: { type: integer }
+                notes: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Booking' } } } }
+        '409': { description: Slot already taken }
+
+  # ===== RESPECTS (Phase 2) =====
+  /api/v1/respects:
+    post:
+      tags: [respects]
+      summary: Дать респект участнику
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiver_id]
+              properties:
+                receiver_id: { type: integer }
+                role_id: { type: integer }
+                source: { type: string, enum: [miniapp, chat_command, sticker_reaction], default: miniapp }
+                comment: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Respect' } } } }
+        '422': { description: Лимит исчерпан (30/мес или 3 на получателя) }
+
+  /api/v1/respects/balance:
+    get:
+      tags: [respects]
+      summary: Мой месячный баланс респектов и история
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  month: { type: string, example: "2026-05" }
+                  total: { type: integer, example: 30 }
+                  used: { type: integer }
+                  remaining: { type: integer }
+                  given: { type: array, items: { $ref: '#/components/schemas/Respect' } }
+                  received_count: { type: integer }
+
+  # ===== COMPLAINTS (Phase 2) =====
+  /api/v1/complaints:
+    post:
+      tags: [complaints]
+      summary: Подать жалобу
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [target_id, reason]
+              properties:
+                target_id: { type: integer }
+                reason: { type: string }
+                evidence:
+                  type: object
+                  description: ссылки на сообщения, скриншоты
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Complaint' } } } }
+
+  # ===== TIME ECONOMY (Phase 3) =====
+  /api/v1/gifts:
+    post:
+      tags: [time-economy]
+      summary: Подарить дни (/gift)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiver_id, days]
+              properties:
+                receiver_id: { type: integer }
+                days: { type: integer, minimum: 1 }
+                is_anonymous: { type: boolean, default: false }
+                message: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/TimeGift' } } } }
+        '422': { description: Недостаточно дней или нарушено правило 30-дневного остатка }
+
+  /api/v1/burns:
+    post:
+      tags: [time-economy]
+      summary: Сжечь дни (/burn)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [days]
+              properties:
+                days: { type: integer, minimum: 1 }
+                reason: { type: string }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/DayBurn' } } } }
+
+  # ===== AI =====
+  /api/v1/match:
+    post:
+      tags: [ai]
+      summary: AI-матчинг — найти топ-3 участников
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                query: { type: string, description: "необязательный контекст запроса" }
+                role_id: { type: integer }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id: { type: integer }
+                  results:
+                    type: array
+                    items: { $ref: '#/components/schemas/MatchResult' }
+
+  /api/v1/match/{id}/feedback:
+    post:
+      tags: [ai]
+      summary: Feedback на match-результат
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [suggested_user_id, rating]
+              properties:
+                suggested_user_id: { type: integer }
+                rating: { type: string, enum: [useful, neutral, miss] }
+                comment: { type: string }
+      responses:
+        '201': { description: Created }
+
+  /api/v1/ask:
+    post:
+      tags: [ai]
+      summary: KB query (/ask)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query_id: { type: integer }
+                  answer: { type: string }
+                  sources:
+                    type: array
+                    items: { $ref: '#/components/schemas/KBSource' }
+
+  /api/v1/ask/{id}/feedback:
+    post:
+      tags: [ai]
+      summary: Feedback на KB-ответ
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [rating]
+              properties:
+                rating: { type: string, enum: [useful, miss] }
+                comment: { type: string }
+      responses:
+        '201': { description: Created }
+
+  /api/v1/digest/latest:
+    get:
+      tags: [ai]
+      summary: Последний weekly digest
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { $ref: '#/components/schemas/Digest' } } }
+
+  # ===== ADMIN =====
+  /api/v1/admin/applications:
+    get:
+      tags: [admin]
+      summary: Список заявок (модератор+)
+      parameters:
+        - { name: status, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { $ref: '#/components/schemas/Application' } }
+                  count: { type: integer }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/admin/applications/{id}/approve:
+    post:
+      tags: [admin]
+      summary: Одобрить заявку (модератор+)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment: { type: string }
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { $ref: '#/components/schemas/Application' } } } }
+
+  /api/v1/admin/applications/{id}/reject:
+    post:
+      tags: [admin]
+      summary: Отклонить заявку (модератор+)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/v1/admin/users:
+    get:
+      tags: [admin]
+      summary: Список пользователей (модератор+)
+      parameters:
+        - { name: q, in: query, schema: { type: string }, description: "search by username/telegram_id" }
+        - { name: page, in: query, schema: { type: integer } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results: { type: array, items: { $ref: '#/components/schemas/AdminUserCard' } }
+                  count: { type: integer }
+
+  /api/v1/admin/users/{id}/grant-lifetime:
+    post:
+      tags: [admin]
+      summary: Выдать lifetime (super only)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [comment]
+              properties:
+                comment: { type: string }
+      responses:
+        '200': { description: OK }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/admin/users/{id}/extend:
+    post:
+      tags: [admin]
+      summary: Продлить подписку (модератор+ с подтверждением)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [days, comment]
+              properties:
+                days: { type: integer }
+                comment: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/v1/admin/payments/{id}/confirm-manual:
+    post:
+      tags: [admin]
+      summary: Подтвердить СБП-оплату вручную (support+)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [comment]
+              properties:
+                comment: { type: string }
+                evidence_url: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/v1/admin/complaints/{id}/resolve:
+    post:
+      tags: [admin]
+      summary: Разрешить жалобу (модератор+)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolution]
+              properties:
+                resolution: { type: string, enum: [confirmed, rejected, escalated] }
+                comment: { type: string }
+      responses:
+        '200': { description: OK }
+
+  /api/v1/admin/finance/summary:
+    get:
+      tags: [admin]
+      summary: Финансовый отчёт (super+)
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_usd: { type: number }
+                  total_rub: { type: number }
+                  by_method: { type: object, additionalProperties: { type: number } }
+                  by_tariff: { type: object, additionalProperties: { type: number } }
+
+  /api/v1/admin/funnel:
+    get:
+      tags: [admin]
+      summary: Воронка (модератор+)
+      parameters:
+        - { name: from, in: query, schema: { type: string, format: date } }
+        - { name: to, in: query, schema: { type: string, format: date } }
+        - { name: utm_source, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        step: { type: string }
+                        count: { type: integer }
+                        conversion: { type: number }
+
+  /api/v1/admin/days-converter:
+    post:
+      tags: [admin]
+      summary: Конвертер дней (super only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, days_delta, direction, comment]
+              properties:
+                user_id: { type: integer }
+                days_delta: { type: integer }
+                direction: { type: string, enum: [credit, debit] }
+                comment: { type: string }
+      responses:
+        '201': { description: Created }
+
+  /api/v1/admin/roles:
+    get:
+      tags: [admin]
+      summary: Список ролей (CRUD)
+      responses:
+        '200': { description: OK, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/Role' } } } } }
+    post:
+      tags: [admin]
+      summary: Создать роль (super+)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RoleInput' } } }
+      responses:
+        '201': { description: Created, content: { application/json: { schema: { $ref: '#/components/schemas/Role' } } } }
+
+  /api/v1/admin/roles/{id}:
+    patch:
+      tags: [admin]
+      summary: Обновить роль (super+)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      requestBody:
+        content: { application/json: { schema: { $ref: '#/components/schemas/RoleInput' } } }
+      responses:
+        '200': { description: OK }
+    delete:
+      tags: [admin]
+      summary: Архивировать роль (super+)
+      parameters: [{ name: id, in: path, required: true, schema: { type: integer } }]
+      responses:
+        '204': { description: Archived }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  responses:
+    Unauthorized:
+      description: Не авторизован
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    Forbidden:
+      description: Нет прав
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    NotFound:
+      description: Не найдено
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+    BadRequest:
+      description: Невалидный запрос
+      content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } }
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+        message: { type: string }
+        details: { type: object, additionalProperties: true }
+
+    UserBrief:
+      type: object
+      properties:
+        id: { type: integer }
+        telegram_id: { type: integer }
+        username: { type: string }
+        first_name: { type: string }
+        language_code: { type: string }
+
+    MemberProfile:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/UserBrief' }
+        bio: { type: string }
+        competencies: { type: string }
+        interests: { type: string }
+        roles:
+          type: array
+          items:
+            type: object
+            properties:
+              role: { $ref: '#/components/schemas/Role' }
+              stars: { type: integer }
+              kyc_status: { type: string }
+        respects_month:
+          type: object
+          properties:
+            month: { type: string }
+            received: { type: integer }
+            given_remaining: { type: integer }
+
+    Subscription:
+      type: object
+      properties:
+        id: { type: integer }
+        tariff: { type: string }
+        status: { type: string }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date, nullable: true }
+        days_remaining: { type: integer, nullable: true }
+        is_lifetime: { type: boolean }
+        lifetime_budget:
+          type: object
+          nullable: true
+          properties:
+            year: { type: integer }
+            budget_total: { type: integer }
+            budget_used: { type: integer }
+
+    Payment:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { type: string }
+        tariff: { type: string }
+        method: { type: string }
+        amount_usd: { type: number }
+        amount_charged: { type: number }
+        currency_charged: { type: string }
+        provider_invoice_url: { type: string, nullable: true }
+        invoice_created_at: { type: string, format: date-time }
+        paid_at: { type: string, format: date-time, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+
+    LawAcceptance:
+      type: object
+      properties:
+        accepted_at: { type: string, format: date-time }
+        accepted_kb_indexing: { type: boolean }
+
+    TimeSlot:
+      type: object
+      properties:
+        id: { type: integer }
+        start_at: { type: string, format: date-time }
+        end_at: { type: string, format: date-time }
+        status: { type: string }
+
+    Booking:
+      type: object
+      properties:
+        id: { type: integer }
+        slot: { $ref: '#/components/schemas/TimeSlot' }
+        status: { type: string }
+        meeting_url: { type: string, nullable: true }
+
+    Respect:
+      type: object
+      properties:
+        id: { type: integer }
+        receiver_id: { type: integer }
+        role_id: { type: integer, nullable: true }
+        source: { type: string }
+        month_key: { type: string }
+        created_at: { type: string, format: date-time }
+
+    Complaint:
+      type: object
+      properties:
+        id: { type: integer }
+        target_id: { type: integer }
+        status: { type: string }
+        submitted_at: { type: string, format: date-time }
+
+    TimeGift:
+      type: object
+      properties:
+        id: { type: integer }
+        receiver_id: { type: integer }
+        days: { type: integer }
+        usd_equivalent: { type: number }
+        is_anonymous: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    DayBurn:
+      type: object
+      properties:
+        id: { type: integer }
+        days: { type: integer }
+        usd_equivalent: { type: number }
+        reason: { type: string, nullable: true }
+
+    MatchResult:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/UserBrief' }
+        role: { type: string }
+        stars: { type: integer }
+        score: { type: number }
+        explanation: { type: string }
+
+    KBSource:
+      type: object
+      properties:
+        chunk_id: { type: integer }
+        message_id: { type: integer }
+        snippet: { type: string }
+        posted_at: { type: string, format: date-time }
+
+    Digest:
+      type: object
+      properties:
+        id: { type: integer }
+        period_start: { type: string, format: date }
+        period_end: { type: string, format: date }
+        content: { type: string }
+        top_topics:
+          type: array
+          items: { type: string }
+
+    Role:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string }
+        kyc_required: { type: boolean }
+        is_archived: { type: boolean }
+
+    RoleInput:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        description: { type: string }
+        kyc_required: { type: boolean }
+
+    Application:
+      type: object
+      properties:
+        id: { type: integer }
+        user: { $ref: '#/components/schemas/UserBrief' }
+        status: { type: string }
+        source: { type: string }
+        submitted_at: { type: string, format: date-time }
+        reviewed_at: { type: string, format: date-time, nullable: true }
+        utm:
+          type: object
+          properties:
+            source: { type: string }
+            medium: { type: string }
+            campaign: { type: string }
+
+    AdminUserCard:
+      type: object
+      properties:
+        user: { $ref: '#/components/schemas/UserBrief' }
+        subscription: { $ref: '#/components/schemas/Subscription' }
+        ltv_usd: { type: number }
+        is_blocked: { type: boolean }
+        roles:
+          type: array
+          items: { type: string }

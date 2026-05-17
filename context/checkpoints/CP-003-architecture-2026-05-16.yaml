@@ -1,0 +1,92 @@
+checkpoint:
+  id: "CP-003-architecture-2026-05-16"
+  created_at: "2026-05-16"
+  created_by: "Orchestrator Agent"
+
+  phase: "Architecture"
+  status: "completed"
+
+  summary: |
+    Phase 5 Architecture полностью завершена. 4 агента (Architect, Data,
+    Security, AI-Agents) отработали параллельно и создали 28 артефактов.
+    Финализировано: 13 bounded contexts, 8 ADR, AaC (workspace.dsl + 4 yaml),
+    IfaC (interface-rules + visual-regression-config), 35 таблиц + OpenAPI
+    3.1 с 30 endpoints, 41 угроза по STRIDE, AI-подсистема с моделью cost
+    $1.13/user/мес.
+
+    NSM финализирована как композитная Engaged Active Paid Members
+    (устраняет конфликт Product/Analytics). Forex источник = ЦБ РФ XML.
+
+    Architecture Gate пройден. Blockers Phase 6 — юр.вопросы (закон,
+    refund policy, Роскомнадзор) и выбор USDT-провайдера/хостинга.
+
+  participating_agents:
+    - agent: "Architect"
+      contribution: "AaC + IfaC + 8 ADR + NSM финализация"
+    - agent: "Data"
+      contribution: "35 таблиц, OpenAPI, миграции, event storming"
+    - agent: "Security"
+      contribution: "STRIDE 41 угроза, OWASP, payments/AI/privacy security"
+    - agent: "AI-Agents"
+      contribution: "AI-архитектура, matching/RAG/digest, model router, prompts library"
+    - agent: "Orchestrator"
+      contribution: "Координация, summary, checkpoint"
+
+  artifacts:
+    - path: "context/summaries/architecture-summary.yaml"
+      status: "created"
+      summary: "Phase summary Architecture: 28 артефактов, 19 decisions, blockers"
+
+  decisions:
+    - id: "DEC-016"
+      decision: "Architecture Gate пройден"
+      rationale: "Все 7 quality_criteria выполнены: workspace.dsl, contexts, constraints, dependency rules, fitness functions, NSM, IfaC. Артефакты от Data/Security/AI согласованы с Architect через next_steps."
+      stakeholder: "Orchestrator"
+    - id: "DEC-017"
+      decision: "Эскалировать пользователю выбор Phase 5.5 DDD Agent Generation"
+      rationale: "Rule 09 рекомендует, но это удлинит проект. Решение пользователя."
+      stakeholder: "Orchestrator"
+
+  tasks:
+    completed_since_last_checkpoint:
+      - "TASK-008"
+      - "TASK-009"
+      - "TASK-010"
+      - "TASK-011"
+    in_progress: []
+    totals:
+      completed: 11
+      in_progress: 0
+      blocked: 0
+      total: 11
+
+  next_actions:
+    - action: "Эскалировать пользователю выбор: DDD Agent Generation vs классическая Phase 6"
+      agent: "User"
+      priority: 1
+    - action: "Эскалировать пользователю blockers Phase 6 (юр.вопросы, USDT-провайдер, хостинг)"
+      agent: "User"
+      priority: 1
+
+  blockers:
+    high:
+      - "Юр. согласование закона клуба + privacy policy (152-ФЗ + GDPR)"
+      - "Refund policy не определена"
+      - "Уведомление Роскомнадзора об обработке ПДн"
+    medium:
+      - "USDT-провайдер не выбран"
+      - "Хостинг РФ vs зарубежный"
+
+  metrics:
+    completion_percentage: 100
+    documents_created: 28  # 8 Architect + 5 Data + 6 Security + 7 AI + 2 IfaC
+    decisions_made: 19     # 7 Architect + 7 Data + 7 Security + 5 AI - 7 дубл
+    bounded_contexts: 13
+    adrs: 8
+    fitness_functions: 13
+    tables: 35
+    api_endpoints: 30
+    domain_events: 35
+    stride_threats: 41
+    ai_services: 4
+    ai_cost_per_user_month_target: "$1.13 (cap $2)"

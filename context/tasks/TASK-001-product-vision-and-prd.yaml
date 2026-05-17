@@ -1,0 +1,305 @@
+task:
+  id: "TASK-001"
+  file: "TASK-001-product-vision-and-prd.yaml"
+
+  request:
+    agent: "Product"
+    type: "create"
+    priority: "critical"
+    created_at: "2026-05-15"
+    phase: "Discovery"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: []
+    checkpoint_ref: "CP-000-intake-2026-05-15"
+
+    input:
+      summary: |
+        Создать Vision, PRD и User Stories для Telegram-клуба «Клуб 33».
+        Покрыть ВСЕ 3 фазы релиза как единый план (по ТЗ §24), с явной разбивкой
+        фич по фазам и приоритетам (P0/P1/P2). User Stories с acceptance criteria,
+        привязанные к роли (кандидат, участник, lifetime, модератор, админ, основатель).
+      references:
+        - "docs/Club 33 — ТЗ v5 (финал, 2026-05-05).pdf"
+        - "context/project-brief.yaml"
+        - "context/summaries/system-adaptation-summary.yaml"
+      constraints:
+        - "Тон коммуникации — на «ты», дружелюбно, коротко (для всех текстов бота/UI)"
+        - "Фазы: 1 (базовый бот + платежи + минимальная админка), 2 (социальный слой + AI), 3 (экономика времени)"
+        - "Сохранить ВСЕ открытые вопросы (ТЗ §26) как Product Decisions Required"
+        - "AI-сервисы — только Anthropic (Claude)"
+        - "Принятие закона клуба — ручной ввод фразы, не кнопка"
+
+    expected_output:
+      deliverables:
+        - "docs/discovery/vision.md"
+        - "docs/discovery/prd.md"
+        - "docs/discovery/user-stories.md"
+        - "docs/discovery/personas.md"
+      format: "product_summary"
+      quality_criteria:
+        - "Vision содержит проблему, решение, ценность, целевую аудиторию, success metrics"
+        - "PRD покрывает все §1–§25 ТЗ с разбивкой по фазам"
+        - "User Stories в формате 'As a [роль], I want [действие], so that [ценность]' + AC"
+        - "Чёткое разделение фич по 3 фазам релиза с зависимостями"
+        - "Personas: кандидат, участник, lifetime, модератор, админ, основатель"
+        - "Список Open Decisions с владельцами (команда клуба / разработчик / Product)"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "~1 рабочий цикл агента"
+    checkpoint_ref: "CP-000-intake-2026-05-15"
+
+    output:
+      summary: |
+        Созданы 4 артефакта Discovery-фазы для проекта «Клуб 33»: Vision,
+        PRD (с разбивкой по 3 фазам и Open Decisions §26 ТЗ), 52 User Stories
+        в 7 эпиках с Given/When/Then AC, и 6 Personas (кандидат, участник,
+        lifetime, модератор, админ, основатель). Все §1–§25 ТЗ покрыты.
+      artifacts:
+        - path: "docs/discovery/vision.md"
+          description: "Vision: проблема, решение, ЦА, ценность, KPI, North Star Metric"
+        - path: "docs/discovery/prd.md"
+          description: "PRD: 35+ функциональных требований по 3 фазам, NFR, Open Decisions, риски"
+        - path: "docs/discovery/user-stories.md"
+          description: "52 User Stories в 7 эпиках, приоритеты P0/P1/P2, фазы Ф1/Ф2/Ф3"
+        - path: "docs/discovery/personas.md"
+          description: "6 персон с целями, болями, поведением и ожиданиями от продукта"
+      decisions:
+        - id: "DEC-001"
+          decision: "Принятие закона клуба — ручной ввод фразы, кнопка «Согласен» отсутствует"
+          rationale: "Усилие = осознанность; отсекает «случайных»; зафиксировано в US-015"
+        - id: "DEC-002"
+          decision: "Lifetime-участники не получают напоминаний о продлении"
+          rationale: "Их подписка бессрочна; напоминания создавали бы шум"
+        - id: "DEC-003"
+          decision: "Lifetime годовой бюджет 33 дня сбрасывается 1 января 00:00 МСК"
+          rationale: "Календарный год — простое и понятное правило; согласовано с §14.2 ТЗ"
+        - id: "DEC-004"
+          decision: "Дар времени доступен только при остатке подписки ≥ 30 дней после дара"
+          rationale: "Защита от случайной потери собственного доступа; §14.1 ТЗ"
+        - id: "DEC-005"
+          decision: "AI-сервисы — только Anthropic Claude, без других провайдеров"
+          rationale: "Зафиксировано в project-brief и ТЗ §15; снижает мультивендорные риски"
+        - id: "DEC-006"
+          decision: "North Star Metric — Weekly Active Members с осмысленным действием в mini-app или чате"
+          rationale: "Метрика отражает живость клуба, а не только наличие подписки"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Vision содержит проблему, решение, ценность, ЦА, KPI: passed"
+        - "PRD покрывает все §1–§25 ТЗ с фазами: passed"
+        - "User Stories в As a/I want/so that + Given/When/Then: passed (52 stories)"
+        - "Разделение по 3 фазам с зависимостями: passed"
+        - "6 Personas: passed"
+        - "Open Decisions с владельцами: passed (11 пунктов из §26 ТЗ)"
+
+    issues:
+      - severity: "medium"
+        description: |
+          PDF ТЗ извлекался через pdftotext с кириллической кодировкой,
+          часть текста расшифрована частично. Структурные ссылки (§1–§26)
+          и схема ТЗ восстановлены полностью; смысловое наполнение взято
+          из context/project-brief.yaml, где оно уже было оцифровано
+          Orchestrator-агентом на этапе Intake.
+        recommendation: |
+          Перед Architecture Gate валидировать с командой клуба
+          точные формулировки по §26 (см. Open Decisions OD-CLUB-01..05).
+      - severity: "high"
+        description: |
+          Open Decisions OD-CLUB-01..03 (коэффициент деградации, пороги звёзд,
+          механизм падения активности) блокируют детальную реализацию Phase 2
+          (F2.6, US-030, US-031).
+        recommendation: |
+          Собрать решения с командой клуба до начала Phase 5 (Architecture)
+          для Phase 2 фич, иначе зафиксировать дефолтные значения как ADR.
+      - severity: "medium"
+        description: |
+          OD-DEV-02 (стек mini-app) и OD-DEV-05 (календарь) затрагивают
+          архитектурные решения Phase 1 и 2.
+        recommendation: |
+          Решить совместно с Architect Agent на Phase 2 (System Adaptation
+          / Architecture).
+
+    next_steps:
+      - action: "Согласовать Vision/PRD/Personas/User Stories с пользователем"
+        agent: "Orchestrator"
+        priority: "high"
+      - action: "Собрать ответы на OD-CLUB-01..05 с командой клуба"
+        agent: "Orchestrator → User"
+        priority: "high"
+      - action: "Конкурентный анализ (TASK-002) — запустить параллельно"
+        agent: "Research"
+        priority: "high"
+      - action: "Tracking plan на основе KPI из Vision (TASK-003)"
+        agent: "Analytics"
+        priority: "high"
+      - action: "Бизнес-процессы из эпиков User Stories (TASK-004)"
+        agent: "Business-Analyst"
+        priority: "high"
+
+    agent_data:
+      format: "product_summary"
+      content:
+        vision:
+          problem: "Закрытые сообщества теряют живость из-за ручного хаоса в воронке, оплатах, доступе и социальном капитале."
+          solution: "Telegram-бот + mini-app + web-админка с воронкой, оплатами (USDT/СБП/ЮKassa), invite, социальным слоем (роли, респекты, звёзды, жалобы), экономикой времени и AI-сервисами (Anthropic Claude)."
+          target_users:
+            - "Кандидат"
+            - "Участник"
+            - "Lifetime-участник"
+            - "Модератор"
+            - "Админ"
+            - "Основатель"
+          key_metrics:
+            - "Conversion bot_start → application ≥ 30%"
+            - "Conversion approved → payment_completed ≥ 60%"
+            - "Conversion payment_completed → invite_used ≥ 90%"
+            - "Renewal rate подписки ≥ 50% (Ф2)"
+            - "/match CSAT ≥ 4/5"
+            - "Median time-to-confirm платежа ≤ 7 мин"
+          north_star_metric: "Weekly Active Members с осмысленным действием в mini-app или чате"
+
+        scope:
+          phase_1_features:
+            - "Telegram-бот: /start, презентация, заявка через Google-форму"
+            - "Ручная модерация заявок (web-админка)"
+            - "Тарифы 6 мес (1000 USD) и 12 мес (1500 USD); lifetime — по решению основателя"
+            - "Оплаты: USDT (TRC20/TON), ЮKassa (RUB с фиксацией курса), СБП (ручная сверка)"
+            - "Webhook-подтверждение, кнопка «Поддержка» при >10 мин"
+            - "Календарь интервью (club33calendar или Calendly)"
+            - "Закон клуба: ручной ввод фразы (не кнопка)"
+            - "Invite: лимит 1, TTL 24 ч, настраиваемо"
+            - "Раздел «Мой доступ»: статус, продление, напоминания за 10 дней"
+            - "Минимальная админка: пользователи, заявки, очередь интервью, финансы, воронка, экспорт"
+            - "Уведомления в админ-чат"
+          phase_2_features:
+            - "CRUD ролей (ниш), назначение на интервью, KYC-флаг вручную"
+            - "Mini-app shell: профиль, респекты, матчинг, digest, жалобы"
+            - "Респекты: 30/мес, лимит 3 на получателя, сброс 1 числа 00:00 МСК"
+            - "Звёзды 0–4 с формулой репутации, деградацией, падением от неактивности"
+            - "Жалобы анонимные для получателя, модерация"
+            - "AI-матчинг /match (Anthropic Claude, embeddings 1536)"
+            - "База знаний RAG /ask + Listener-бот"
+            - "Еженедельный digest /digest"
+            - "AI-дашборд (минимум)"
+          phase_3_features:
+            - "Дар времени (1 день = 2.5 USD), команда /gift, условие 30+ дней"
+            - "Сжигание дней /burn"
+            - "Lifetime годовой бюджет 33 дня для дарения (сброс 1 января)"
+            - "Админ-конвертер «доллары ↔ дни» с логом"
+            - "Реакция-стикер как способ дать респект"
+            - "Расширенный AI-дашборд: качество матчинга, KB-метрики, inference cost"
+          total_stories: 52
+          p0_stories: 35
+          p1_stories: 13
+          p2_stories: 1
+          epics:
+            - "Воронка (E-FUNNEL)"
+            - "Платежи (E-PAY)"
+            - "Доступ (E-ACCESS)"
+            - "Социал (E-SOCIAL)"
+            - "Время (E-TIME)"
+            - "AI (E-AI)"
+            - "Админка (E-ADMIN)"
+
+        personas:
+          - "Кандидат: ждёт ясную воронку без переписки в личке"
+          - "Участник: ищет полезных людей через /match, копит респекты"
+          - "Lifetime: годовой бюджет 33 дня для дарения, без напоминаний о продлении"
+          - "Модератор: рассматривает жалобы, может ставить респекты от себя"
+          - "Админ: финансы, заявки, роли, экспорт, AI-расходы"
+          - "Основатель: интервью, финальное одобрение, выдача lifetime, редактирование закона клуба"
+
+        constraints:
+          - "Тон коммуникации — на «ты», дружелюбно, коротко"
+          - "Бот — администратор канала и чата"
+          - "Закон клуба — ручной ввод фразы, кнопка «Согласен» запрещена"
+          - "Подтверждение оплаты 5–10 мин; >10 мин → кнопка «Поддержка»"
+          - "AI-провайдер — только Anthropic Claude"
+          - "Курс USD→RUB фиксируется на момент создания инвойса"
+          - "Релиз поэтапный: 1 → 2 → 3"
+
+        key_decisions:
+          - id: "DEC-001"
+            decision: "Закон клуба — ручной ввод фразы"
+          - id: "DEC-002"
+            decision: "Lifetime не получает напоминаний о продлении"
+          - id: "DEC-003"
+            decision: "Lifetime-бюджет 33 дня сбрасывается 1 января 00:00 МСК"
+          - id: "DEC-004"
+            decision: "Дар возможен только при остатке ≥ 30 дней после дара"
+          - id: "DEC-005"
+            decision: "AI = только Anthropic Claude"
+          - id: "DEC-006"
+            decision: "NSM = Weekly Active Members с осмысленным действием"
+
+        open_decisions:
+          with_club_team:
+            - id: "OD-CLUB-01"
+              question: "Коэффициент деградации балла репутации в месяц"
+              blocks_phase: "Phase 2"
+              owner: "Команда клуба"
+            - id: "OD-CLUB-02"
+              question: "Пороги звёзд (0★/1★/2★/3★/4★)"
+              blocks_phase: "Phase 2"
+              owner: "Команда клуба"
+            - id: "OD-CLUB-03"
+              question: "Падение от неактивности: 60 дней или N сообщений?"
+              blocks_phase: "Phase 2"
+              owner: "Команда клуба"
+            - id: "OD-CLUB-04"
+              question: "Точная фраза согласия для ручного ввода"
+              blocks_phase: "Phase 1"
+              owner: "Команда клуба + Основатель"
+            - id: "OD-CLUB-05"
+              question: "Финальный текст «Закона клуба»"
+              blocks_phase: "Phase 1"
+              owner: "Основатель"
+          with_developer:
+            - id: "OD-DEV-01"
+              question: "Уровни админ-ролей: один или super/модератор/support?"
+              blocks_phase: "Phase 1"
+              owner: "Product + Architect"
+            - id: "OD-DEV-02"
+              question: "Mini-app стек: React+Vite или нативный HTML?"
+              blocks_phase: "Phase 2"
+              owner: "Architect + UI"
+            - id: "OD-DEV-03"
+              question: "Combat-бот как референс UI — права на использование паттернов"
+              blocks_phase: "Phase 2"
+              owner: "Product (юр. проверка)"
+            - id: "OD-DEV-04"
+              question: "Оркестрация моделей Anthropic под задачи"
+              blocks_phase: "Phase 2"
+              owner: "AI-Agents + Architect"
+            - id: "OD-DEV-05"
+              question: "Календарь: club33calendar vs Calendly"
+              blocks_phase: "Phase 1"
+              owner: "Product + Architect"
+            - id: "OD-DEV-06"
+              question: "Источник курса USD→RUB для ЮKassa"
+              blocks_phase: "Phase 1"
+              owner: "Architect + Data"
+
+        risks:
+          - "Задержки USDT > 10 мин — mitigation: кнопка Поддержка + polling"
+          - "Open Decisions блокируют Phase 2 (звёзды/деградация)"
+          - "Низкое качество /match при пустых bio — UI стимулирует заполнение"
+          - "Утечка анонимности жалоб — полный лог, ограниченный доступ"
+          - "Cost overrun на AI — per-feature кэп токенов + AI-дашборд"
+          - "Юр. вопрос по UI-паттернам Combat-бота (OD-DEV-03)"
+
+        documents_created:
+          - path: "docs/discovery/vision.md"
+            status: "complete"
+          - path: "docs/discovery/prd.md"
+            status: "complete"
+          - path: "docs/discovery/user-stories.md"
+            status: "complete"
+          - path: "docs/discovery/personas.md"
+            status: "complete"
+
+    signature: "Product Agent"

@@ -1,0 +1,94 @@
+checkpoint:
+  id: "CP-000-intake-2026-05-15"
+  created_at: "2026-05-15"
+  created_by: "Orchestrator Agent"
+
+  phase: "Intake + System Adaptation"
+  status: "completed"
+
+  summary: |
+    Проект «Клуб 33» инициализирован на основе ТЗ v5 (2026-05-05).
+    Закрытое сообщество с Telegram-ботом, mini-app, web-админкой, AI-сервисами.
+    3 фазы релиза: (1) базовый бот + платежи + админка, (2) социальный слой + AI,
+    (3) экономика времени. Стартовый шаблон отсутствует — проектируем под
+    Django 5 + DRF + React 18 + Vite 6 + PostgreSQL + Redis + Anthropic Claude.
+    Active Roster: все 19 базовых агентов активны; новые навыки требуются для
+    Anthropic-оркестрации и USDT-платежей. Готов к Discovery.
+
+  participating_agents:
+    - agent: "Orchestrator"
+      contribution: "Анализ ТЗ, project brief, system adaptation, инициализация контекста"
+
+  artifacts:
+    - path: "context/project-brief.yaml"
+      status: "created"
+      summary: "Project brief со scope, constraints, tech stack, открытыми вопросами"
+    - path: "context/summaries/system-adaptation-summary.yaml"
+      status: "created"
+      summary: "Active Roster, gap analysis, новые навыки, bounded contexts (preview)"
+    - path: "context/tasks/INDEX.yaml"
+      status: "created"
+      summary: "Пустой реестр задач, last_id=0"
+    - path: "docs/Club 33 — ТЗ v5 (финал, 2026-05-05).pdf"
+      status: "input"
+      summary: "Источник требований — оригинальное ТЗ"
+
+  decisions:
+    - id: "DEC-001"
+      decision: "Проектировать без стартового шаблона (его нет в репозитории)"
+      rationale: "context/STARTER-TEMPLATE.md отсутствует, backend/frontend не созданы. Целевой стек берётся из CLAUDE.md."
+      stakeholder: "Orchestrator"
+    - id: "DEC-002"
+      decision: "Все 19 базовых агентов остаются активными"
+      rationale: "Проект достаточно сложный: FSM-бот + mini-app + платежи + AI + админка + инфраструктура — все компетенции нужны"
+      stakeholder: "Orchestrator"
+    - id: "DEC-003"
+      decision: "Новые навыки требуются: anthropic-claude-orchestration, usdt-payments-trc20-ton"
+      rationale: "ТЗ явно требует оркестрацию моделей Anthropic под стоимость, а также прямую интеграцию USDT (TRC20/TON) с webhook"
+      stakeholder: "Orchestrator"
+    - id: "DEC-004"
+      decision: "Поэтапная разработка: Фаза 1 → Фаза 2 → Фаза 3 (как в ТЗ §24)"
+      rationale: "Фазы зафиксированы в ТЗ. MVP = Фаза 1; социальный слой и AI — Фаза 2; экономика времени — Фаза 3"
+      stakeholder: "Заказчик (через ТЗ)"
+
+  next_actions:
+    - action: "Утвердить System Adaptation Roster и новые навыки с пользователем"
+      agent: "User"
+      priority: 1
+    - action: "Запустить Phase 3 — Discovery: Product Agent → Vision + PRD"
+      agent: "Product"
+      priority: 2
+    - action: "Параллельно: Research Agent → конкурентный анализ закрытых клубов"
+      agent: "Research"
+      priority: 2
+    - action: "Параллельно: Analytics Agent → tracking plan для воронки из §22.8"
+      agent: "Analytics"
+      priority: 3
+    - action: "Business-Analyst → формализация бизнес-процессов воронки, респектов, дара времени"
+      agent: "Business-Analyst"
+      priority: 3
+    - action: "Закрыть открытые вопросы с командой клуба (§26)"
+      agent: "User"
+      priority: 4
+
+  blockers:
+    - blocker: "Открытые вопросы с командой клуба (формула репутации, пороги звёзд, текст «Закона»)"
+      impact: "Блокируют финализацию Phase 2 (звёзды) и Phase 1 (закон клуба)"
+      resolution: "Product Agent соберёт уточняющие вопросы в Discovery и запросит у заказчика"
+    - blocker: "Открытые вопросы с разработчиком (mini-app стек, AI-режимы, календарь, курс USD→RUB)"
+      impact: "Блокируют финализацию Phase 5 (Architecture)"
+      resolution: "Architect Agent проработает рекомендации к Architecture Gate"
+
+  tasks:
+    completed_since_last_checkpoint: []
+    in_progress: []
+    totals:
+      completed: 0
+      in_progress: 0
+      blocked: 0
+      total: 0
+
+  metrics:
+    completion_percentage: 100  # Intake завершён
+    documents_created: 4
+    decisions_made: 4

@@ -1,0 +1,135 @@
+# docs/interface/interface-rules.yaml
+# Правила изменения интерфейса (UI + API) — Interface as Code (rule 08)
+# Created by: Architect Agent | 2026-05-16 | v1.0 | Phase: Architecture
+
+version: "1.0"
+project: "Клуб 33"
+
+api_rules:
+  - id: "IR-001"
+    name: "Публичные endpoints не удаляются без major version bump"
+    severity: "error"
+    rule: "public endpoints must not be removed without major version bump"
+    description: "Удаление существующего endpoint требует версионирования /api/v2/"
+    blocking_ci: true
+
+  - id: "IR-002"
+    name: "Breaking changes требуют ADR"
+    severity: "error"
+    rule: "breaking API changes require ADR documentation"
+    description: "Изменение типа поля, удаление обязательного поля, удаление endpoint, переименование, ужесточение валидации — все требуют ADR-XXX"
+    blocking_ci: true
+    examples_breaking:
+      - "Удаление поля из response"
+      - "Изменение типа поля (string → number)"
+      - "Добавление обязательного поля в request"
+      - "Удаление endpoint"
+      - "Переименование endpoint"
+      - "Изменение HTTP status code (200 → 201)"
+
+  - id: "IR-003"
+    name: "openapi.yaml должен быть актуален"
+    severity: "error"
+    rule: "openapi.yaml must be regenerated after any endpoint change"
+    description: "Каждый PR с изменением endpoint требует обновлённого docs/interface/openapi.yaml"
+    blocking_ci: true
+    ci_check: "drf-spectacular generation + git diff"
+
+  - id: "IR-004"
+    name: "Webhook endpoints — idempotent"
+    severity: "error"
+    rule: "all incoming webhook endpoints must implement idempotency by external_id"
+    description: "Webhook ЮKassa/USDT/Google Forms — не должны создавать дубли"
+
+  - id: "IR-005"
+    name: "Все endpoints — авторизованные по умолчанию"
+    severity: "error"
+    rule: "endpoints are authenticated by default; public endpoints explicitly marked"
+    description: "DRF permission_classes по умолчанию IsAuthenticated; публичные — явно AllowAny + комментарий"
+
+  - id: "IR-006"
+    name: "Версионирование URL"
+    severity: "warning"
+    rule: "all endpoints under /api/v1/ namespace"
+    description: "Готовы к /api/v2/ при необходимости"
+
+  - id: "IR-007"
+    name: "Pagination обязательна для list endpoints"
+    severity: "warning"
+    rule: "list endpoints must use PageNumberPagination or CursorPagination"
+    description: "Защита от unbounded queries"
+
+  - id: "IR-008"
+    name: "Error format унифицирован"
+    severity: "warning"
+    rule: "errors return JSON in format: {error: {code, message, details?}}"
+    description: "Единый формат ошибок для frontend"
+
+ui_rules:
+  - id: "IR-009"
+    name: "Каждый переиспользуемый компонент имеет stories"
+    severity: "warning"
+    rule: "every reusable component must have a .stories.jsx file"
+    description: "Source of truth — Storybook stories (rule 08)"
+    ci_check: "storybook build + coverage report"
+
+  - id: "IR-010"
+    name: "Stories покрывают ключевые состояния"
+    severity: "warning"
+    rule: "stories must cover: default, loading, error, empty, disabled, allVariants (where applicable)"
+    description: "Из component-stories-spec.md (UI Agent)"
+
+  - id: "IR-011"
+    name: "Visual baseline обновляется только намеренно"
+    severity: "error"
+    rule: "visual baselines must not be auto-updated in CI"
+    description: "Baseline (frontend/tests/visual/__snapshots__/) обновляется ТОЛЬКО локально при намеренном изменении UI"
+    blocking_ci: true
+
+  - id: "IR-012"
+    name: "Design tokens — единственный источник стилей"
+    severity: "warning"
+    rule: "all colors, spacing, typography must come from design-tokens.yaml"
+    description: "Hardcoded #C9A24A в коде запрещён — используем токен colors.primary.500"
+
+  - id: "IR-013"
+    name: "Accessibility — WCAG AA"
+    severity: "warning"
+    rule: "components must pass axe-core checks (no critical violations)"
+    description: "См. docs/design/ux/accessibility-checklist.md"
+
+  - id: "IR-014"
+    name: "Mini-app и admin используют общую design system"
+    severity: "warning"
+    rule: "components imported from packages/design-system, not duplicated"
+    description: "DEC-UI-005 — моно-система"
+
+  - id: "IR-015"
+    name: "Запрещённые UI-паттерны"
+    severity: "warning"
+    rule: "Lottie, 3D, glassmorphism, neumorphism are not allowed"
+    description: "DEC-UI-006"
+
+  - id: "IR-016"
+    name: "Запрещённые тексты (стоп-лист)"
+    severity: "warning"
+    rule: "do not use: 'уважаемый', 'премиум', 'VIP', 'эксклюзивный', 'юзер', 'произошла ошибка'"
+    description: "DEC-CONTENT-002 — стоп-лист тона"
+
+  - id: "IR-017"
+    name: "Эмодзи лимит в боте"
+    severity: "warning"
+    rule: "bot messages: ≤ 2 sentences, ≤ 1 emoji"
+    description: "DEC-CONTENT-001"
+
+contract_change_workflow:
+  description: "Процесс изменения API/UI контрактов"
+  steps:
+    - "1. Изменение в коде → drf-spectacular генерирует новый openapi.yaml"
+    - "2. CI: openapi-diff vs committed → если breaking → fail"
+    - "3. Если breaking — Architect создаёт ADR-XXX → коммит обновлённого openapi.yaml + ADR"
+    - "4. Review Agent — Step 3.5 Interface Compliance check"
+    - "5. Для UI: при намеренном визуальном изменении — npx playwright test --update-snapshots локально → коммит baseline"
+    - "6. CI visual-regression проверяет diff против committed baseline"
+
+# Документ создан: Architect Agent | Дата: 2026-05-16

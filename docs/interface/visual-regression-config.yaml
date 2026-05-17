@@ -1,0 +1,219 @@
+# docs/interface/visual-regression-config.yaml
+# Конфигурация visual regression тестов (Playwright)
+# Created by: Architect Agent | 2026-05-16 | v1.0 | Phase: Architecture
+
+version: "1.0"
+project: "Клуб 33"
+
+defaults:
+  threshold: 0.02              # 2% diff → fail
+  maxDiffPixels: 100
+  animations: "disabled"       # Отключить анимации для стабильных скриншотов
+  fonts_loaded_wait: true
+  full_page: true
+
+viewports:
+  miniapp:
+    width: 390
+    height: 844
+    device_scale: 2
+    description: "iPhone 14 viewport (типичный mini-app размер)"
+  admin:
+    width: 1440
+    height: 900
+    description: "Desktop admin SPA"
+  admin_mobile:
+    width: 768
+    height: 1024
+    description: "Tablet/mobile admin (responsive)"
+
+pages:
+  # === Mini-app ===
+  - id: "miniapp-home"
+    path: "/"
+    surface: "miniapp"
+    snapshot: "miniapp-home.png"
+    threshold: 0.02
+    description: "Главный экран mini-app"
+
+  - id: "miniapp-profile"
+    path: "/profile"
+    surface: "miniapp"
+    snapshot: "miniapp-profile.png"
+    threshold: 0.03
+
+  - id: "miniapp-respect"
+    path: "/respect"
+    surface: "miniapp"
+    snapshot: "miniapp-respect.png"
+    threshold: 0.02
+
+  - id: "miniapp-match"
+    path: "/match"
+    surface: "miniapp"
+    snapshot: "miniapp-match.png"
+    threshold: 0.03
+    description: "Match-карточки (динамические — больший threshold)"
+
+  - id: "miniapp-ask"
+    path: "/ask"
+    surface: "miniapp"
+    snapshot: "miniapp-ask.png"
+    threshold: 0.02
+
+  - id: "miniapp-digest"
+    path: "/digest"
+    surface: "miniapp"
+    snapshot: "miniapp-digest.png"
+    threshold: 0.03
+
+  - id: "miniapp-gift"
+    path: "/gift"
+    surface: "miniapp"
+    snapshot: "miniapp-gift.png"
+    threshold: 0.02
+
+  - id: "miniapp-complaint"
+    path: "/complaint"
+    surface: "miniapp"
+    snapshot: "miniapp-complaint.png"
+    threshold: 0.02
+
+  - id: "miniapp-access"
+    path: "/access"
+    surface: "miniapp"
+    snapshot: "miniapp-access.png"
+    threshold: 0.02
+    description: "Раздел «Мой доступ»"
+
+  - id: "miniapp-law"
+    path: "/law"
+    surface: "miniapp"
+    snapshot: "miniapp-law.png"
+    threshold: 0.02
+    description: "Экран закона клуба (плашка + ручной ввод)"
+
+  # === Admin ===
+  - id: "admin-login"
+    path: "/admin/login"
+    surface: "admin"
+    snapshot: "admin-login.png"
+    threshold: 0.01
+
+  - id: "admin-dashboard"
+    path: "/admin"
+    surface: "admin"
+    snapshot: "admin-dashboard.png"
+    threshold: 0.03
+    description: "Главный дашборд (с динамическими цифрами — больший threshold)"
+
+  - id: "admin-applications"
+    path: "/admin/applications"
+    surface: "admin"
+    snapshot: "admin-applications.png"
+    threshold: 0.02
+
+  - id: "admin-users"
+    path: "/admin/users"
+    surface: "admin"
+    snapshot: "admin-users.png"
+    threshold: 0.02
+
+  - id: "admin-finance"
+    path: "/admin/finance"
+    surface: "admin"
+    snapshot: "admin-finance.png"
+    threshold: 0.03
+
+  - id: "admin-funnel"
+    path: "/admin/funnel"
+    surface: "admin"
+    snapshot: "admin-funnel.png"
+    threshold: 0.03
+
+  - id: "admin-complaints"
+    path: "/admin/complaints"
+    surface: "admin"
+    snapshot: "admin-complaints.png"
+    threshold: 0.02
+
+  - id: "admin-roles"
+    path: "/admin/roles"
+    surface: "admin"
+    snapshot: "admin-roles.png"
+    threshold: 0.02
+
+  - id: "admin-converter"
+    path: "/admin/converter"
+    surface: "admin"
+    snapshot: "admin-converter.png"
+    threshold: 0.02
+    description: "USD→дни конвертер (super only)"
+
+components:
+  # === Design system (более строгий threshold) ===
+  - story: "Design System/Button"
+    threshold: 0.01
+
+  - story: "Design System/Input"
+    threshold: 0.01
+
+  - story: "Design System/Card"
+    threshold: 0.01
+
+  - story: "Design System/Avatar"
+    threshold: 0.01
+
+  - story: "Design System/Badge"
+    threshold: 0.01
+
+  - story: "Design System/StarLevel"
+    threshold: 0.01
+    description: "Кастомный бейдж 0-4★"
+
+  - story: "Design System/Toast"
+    threshold: 0.01
+
+  - story: "Design System/Modal"
+    threshold: 0.02
+
+  # === Domain components ===
+  - story: "Components/MatchCard"
+    threshold: 0.02
+
+  - story: "Components/RespectButton"
+    threshold: 0.01
+
+  - story: "Components/KbAnswer"
+    threshold: 0.02
+    description: "Perplexity-стиль с footnotes"
+
+  - story: "Components/DigestItem"
+    threshold: 0.02
+
+  - story: "Components/ComplaintForm"
+    threshold: 0.01
+
+  - story: "Components/FunnelStep"
+    threshold: 0.02
+
+  - story: "Components/RoleSelector"
+    threshold: 0.01
+
+dynamic_content_handling:
+  description: "Как стабилизировать скриншоты с динамическими данными"
+  strategies:
+    - "Mock API responses (Playwright fixtures)"
+    - "Freeze date/time (faketime в test setup)"
+    - "Skip animations (animations: disabled)"
+    - "Wait for fonts: page.evaluate('document.fonts.ready')"
+    - "Mask dynamic regions (page.locator(selector).mask)"
+
+ci_integration:
+  job_name: "visual-regression"
+  ci_stage: "test"
+  blocking: true
+  on_failure: "Upload Playwright HTML report as artifact"
+  baseline_update_policy: "ONLY LOCAL: npx playwright test --update-snapshots; commit by developer; reviewer verifies intent"
+
+# Документ создан: Architect Agent | Дата: 2026-05-16

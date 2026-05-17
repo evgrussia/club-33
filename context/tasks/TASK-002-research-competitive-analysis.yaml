@@ -1,0 +1,207 @@
+task:
+  id: "TASK-002"
+  file: "TASK-002-research-competitive-analysis.yaml"
+
+  request:
+    agent: "Research"
+    type: "create"
+    priority: "high"
+    created_at: "2026-05-15"
+    phase: "Discovery"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: []
+    checkpoint_ref: "CP-000-intake-2026-05-15"
+
+    input:
+      summary: |
+        Конкурентный анализ закрытых клубов и Telegram mini-app сообществ.
+        Исследовать механики респектов/звёзд (референс Combat-бот), модели оплаты
+        в крипте + ЮKassa, AI-матчинг участников, RAG по чату, дары/внутренние валюты.
+      references:
+        - "docs/Club 33 — ТЗ v5 (финал, 2026-05-05).pdf"
+        - "context/project-brief.yaml"
+      constraints:
+        - "Фокус на: закрытые бизнес-клубы (RU + global), Telegram-сообщества с подпиской"
+        - "Изучить Combat-бот (UI-паттерны, mini-app механика респектов)"
+        - "Изучить решения для AI-матчинга людей в комьюнити"
+
+    expected_output:
+      deliverables:
+        - "docs/discovery/research/competitive-analysis.md"
+        - "docs/discovery/research/references-uxui.md"
+        - "docs/discovery/research/findings.md"
+      format: "research_summary"
+      quality_criteria:
+        - "Проанализированы ≥5 закрытых клубов с подпиской"
+        - "Описаны механики респектов/репутации с примерами"
+        - "Сравнительная таблица AI-функций (матчинг, KB, digest)"
+        - "Выводы и рекомендации для PRD"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "~1 рабочий день"
+    checkpoint_ref: null
+
+    output:
+      summary: |
+        Проведён конкурентный анализ 10 закрытых клубов и Telegram/Discord-сообществ
+        (Атланты, Эквиум, Клуб Первых, YPO, EO, Vistage, TimeRepublik, Discord
+        karma-боты, Telegram paid channels, Lunchclub). Собраны UX/UI референсы для
+        Telegram Mini App (TelegramUI, Telegram WebApp guide 2025, Lunchclub,
+        Perplexity, TimeRepublik). Сформирована сводка findings с TOP-5
+        рекомендациями для PRD. Combat-бот идентифицировать в открытых источниках
+        не удалось — требуется уточнение у заказчика.
+      artifacts:
+        - path: "docs/discovery/research/competitive-analysis.md"
+          description: "Конкурентный анализ 10 клубов + сравнительная таблица AI-функций"
+        - path: "docs/discovery/research/references-uxui.md"
+          description: "UX/UI референсы для mini-app: паттерны экранов, TelegramUI, visual language"
+        - path: "docs/discovery/research/findings.md"
+          description: "Сводка с TOP-5 рекомендациями для PRD и Design-фазы"
+      decisions:
+        - id: "DEC-R-001"
+          decision: "Рекомендовать TelegramUI (React) как UI-kit для mini-app"
+          rationale: "Решает open question о стеке miniapp, нативный look-and-feel, экономит 4–6 недель"
+        - id: "DEC-R-002"
+          decision: "AI-матчинг ОБЯЗАН включать reasoning + feedback loop"
+          rationale: "Lunchclub-паттерн; снимает black-box effect, улучшает качество через RLHF-цикл"
+        - id: "DEC-R-003"
+          decision: "RAG-ответы ОБЯЗАНЫ содержать source-цитаты (Perplexity-style)"
+          rationale: "Без цитат — галлюцинации; с цитатами — живая память клуба"
+        - id: "DEC-R-004"
+          decision: "Параметры репутации (деградация, пороги звёзд, неактивность) — конфигурируемые через web-админку"
+          rationale: "Эмпирически подбираются на первых 3 месяцах; не блокировать релизами"
+        - id: "DEC-R-005"
+          decision: "Downvote-механика НЕ внедряется"
+          rationale: "Discord-практика подтверждает: downvote порождает токсичность; жалобы (уже в scope) — лучшая альтернатива"
+
+    quality:
+      completion_percentage: 95
+      criteria_met:
+        - "Проанализировано >=5 закрытых клубов: passed (10 клубов/сообществ)"
+        - "Описаны механики респектов/репутации с примерами: passed (§2 findings, §2 competitive-analysis)"
+        - "Сравнительная таблица AI-функций: passed (§4 competitive-analysis)"
+        - "Выводы и рекомендации для PRD: passed (findings.md TOP-5)"
+
+    issues:
+      - severity: "medium"
+        description: "Combat-бот не удалось идентифицировать в открытых источниках по запросам Combat+Telegram+респекты"
+        recommendation: "Запросить у заказчика юзернейм бота или скриншоты до начала Design-фазы. Альтернативные референсы (Combot, Iris, Karma Reborn) задокументированы в references-uxui.md §1."
+      - severity: "low"
+        description: "Точные тарифы Эквиум 2025 расходятся между официальным сайтом и сторонними обзорами"
+        recommendation: "Не критично для PRD; уточнить позже для маркетингового позиционирования"
+      - severity: "low"
+        description: "Lunchclub текущий статус (active/pivot/closed) не подтверждён прямой проверкой lunchclub.com"
+        recommendation: "Влияет только на формулировку 'вдохновлено Lunchclub' в коммуникации; не блокирует Discovery"
+
+    next_steps:
+      - action: "Использовать findings.md как input для PRD"
+        agent: "Product"
+        priority: "high"
+      - action: "Использовать references-uxui.md как input для user flows"
+        agent: "UX"
+        priority: "high"
+      - action: "Использовать references-uxui.md §5 (visual language) и TelegramUI как input для дизайн-системы"
+        agent: "UI"
+        priority: "medium"
+      - action: "Учесть валидацию tech stack из findings §6 при выборе архитектуры (LangChain vs direct SDK, hybrid search)"
+        agent: "Architect"
+        priority: "medium"
+      - action: "Эскалировать к заказчику запрос Combat-бот референса"
+        agent: "Orchestrator"
+        priority: "high"
+
+    agent_data:
+      format: "research_summary"
+      content:
+        competitors_analyzed:
+          ru_premium:
+            - "Атланты (200–300k₽/год, пробный месяц)"
+            - "Эквиум (~400k₽ + ~95–128k₽/мес — требует подтверждения)"
+            - "Клуб Первых от СберПервого"
+            - "R2 Private Leaders Club"
+            - "E-CLUB Сколково"
+          global_executive:
+            - "YPO (~$10k init + $4–15k/год)"
+            - "EO ($2.5k init + $4.27–5.97k/год)"
+            - "Vistage (~$16k/год)"
+          digital_community:
+            - "Discord karma-боты (Reputation Tracker, Karma Reborn, KarmaLink, Mee6)"
+            - "Telegram paid channels (Stars, InviteMember, LaunchPass, $5–15/мес)"
+            - "Lunchclub (AI-networking, status уточняется)"
+          time_banking:
+            - "TimeRepublik (100k+ участников, 1 час = 1 TimeCoin)"
+            - "hOurworld (~400 локальных timebanks, 35k участников)"
+
+        key_findings:
+          rynok_gap: "Связка AI-матчинг + RAG-память + digest + соц-слой в одном продукте — у конкурентов отсутствует"
+          reputation_patterns:
+            works:
+              - "Upvote-only с месячным лимитом"
+              - "Лимит повторного голоса за одного"
+              - "Видимые ранги/звёзды"
+              - "Анонимные жалобы вместо downvote"
+            doesnt_work:
+              - "Downvote (токсичность)"
+              - "Публичная история голосов"
+              - "Глобальная cross-server карма"
+          ai_matching:
+            reference: "Lunchclub"
+            must_have: "reasoning + feedback loop"
+            unique_opportunity: "AI-сборка forum-группы 3–5 чел. (YPO-pattern автоматизирован)"
+          rag:
+            reference: "Perplexity + Question Base"
+            must_have: "source-цитаты с timestamp + автор"
+            metrics: ["feedback_positive_rate", "avg_response_latency", "coverage"]
+          time_economy:
+            reference: "TimeRepublik, hOurworld"
+            differentiator: "Внутриклубная (а не глобальная) → высокое доверие; не маркетплейс → юр-простота"
+
+        ui_recommendations:
+          stack: "React + Vite + TelegramUI (решает open question)"
+          must_use:
+            - "Telegram WebApp.ready() сразу при загрузке"
+            - "Haptic Feedback на критичных действиях"
+            - "Theme params (light/dark автоматически)"
+            - "Native MainButton / BackButton"
+          key_screens:
+            - "Профиль участника (Telegram Cell + Section)"
+            - "Дать респект (one-tap + haptic success)"
+            - "Дар времени (slider + MainButton, TimeRepublik-pattern)"
+            - "/match с reasoning-карточками (Lunchclub-pattern)"
+            - "/ask с footnotes-источниками (Perplexity-pattern)"
+            - "Анонимная жалоба (Reddit + Telegram native)"
+            - "Digest (Notion/GitHub digest-pattern)"
+            - "Onboarding (Slack-pattern, 3 экрана)"
+
+        top_5_recommendations:
+          - id: 1
+            title: "Матчинг с reasoning + feedback loop — must-have"
+            impact: "high"
+            source: "Lunchclub"
+          - id: 2
+            title: "RAG-ответы с обязательными source-ссылками"
+            impact: "high"
+            source: "Perplexity, Question Base"
+          - id: 3
+            title: "TelegramUI (React) как UI-kit для mini-app"
+            impact: "high"
+            source: "github.com/telegram-mini-apps-dev/TelegramUI"
+          - id: 4
+            title: "Конфигурируемые параметры репутации в админке"
+            impact: "medium"
+            source: "Best practice + open questions из brief"
+          - id: 5
+            title: "Запросить у заказчика референс Combat-бота"
+            impact: "blocker for Design phase"
+            source: "Research gap"
+
+        open_questions_for_escalation:
+          - "Combat-бот: запросить юзернейм/скриншоты у заказчика (HIGH)"
+          - "Lunchclub статус: прямая проверка lunchclub.com (LOW)"
+          - "Точные тарифы Эквиум 2025 (LOW)"
+          - "Feedback-loop матчинга: opt-in или mandatory? (рекомендация — opt-in)"
+
+    signature: "Research Agent"

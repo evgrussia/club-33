@@ -1,0 +1,115 @@
+phase_summary:
+  phase: "Architecture"
+  status: "completed"
+  duration: "параллельное выполнение 4 агентов (2026-05-16)"
+  created_at: "2026-05-16"
+  created_by: "Orchestrator Agent"
+
+  key_outcomes:
+    - "AaC: workspace.dsl (C4: 7 persons, 8 containers, 6 external), constraints.yaml (5 категорий), dependency-rules.yaml, 13 fitness-functions"
+    - "IfaC: interface-rules.yaml (8 API + 9 UI rules), visual-regression-config.yaml (19 pages + 15 components)"
+    - "13 bounded contexts (расширено с preview 10 — добавлены Calendar, Listener, Audit)"
+    - "8 ADR (tech stack, contexts, AI, payments, calendar, RBAC, FSM, NSM)"
+    - "NSM финализирована: композитная Engaged Active Paid Members (Y1 target: 600 EAPM при 1000 APM)"
+    - "Data: 35 таблиц, OpenAPI 3.1 с 30 endpoints, 35 domain events, pg_partman + pgvector strategy"
+    - "Security: 41 угроза по STRIDE × 10 контекстов, OWASP Top 10, 24 секрета, top-5 critical risks"
+    - "AI: 4 сервиса (Matching+RAG+Digest+Listener), model router, cost-cap $2/user/мес (~$1.13 на 100 active users)"
+
+  key_decisions:
+    architect:
+      - "DEC-ARCH-001: 13 bounded contexts (+ Calendar, Listener, Audit)"
+      - "DEC-ARCH-002: NSM = Engaged Active Paid Members (композитная, устраняет конфликт Product vs Analytics)"
+      - "DEC-ARCH-003: Single monolith Django (1-5k users Y1) + Listener как отдельный процесс"
+      - "DEC-ARCH-004: FSM двойное хранение Redis (hot) + Postgres (cold)"
+      - "DEC-ARCH-005: Payments via Adapter pattern + idempotency external_id"
+      - "DEC-ARCH-006: Forex = ЦБ РФ XML по умолчанию (DEC-010 финализирован)"
+      - "DEC-ARCH-007: AI cost guardrail через ai_usage_log + daily aggregation"
+    data:
+      - "DEC-DATA-01: Партиционирование events/chat_messages по месяцу (pg_partman)"
+      - "DEC-DATA-02: pgvector ivfflat для member_profiles, HNSW для kb_chunks"
+      - "DEC-DATA-03: Идемпотентность webhook через UNIQUE external_id"
+      - "DEC-DATA-05: subscriptions partial UNIQUE (user_id) WHERE status='active'"
+      - "DEC-DATA-06: fx_rate_snapshot отдельной таблицей"
+      - "DEC-DATA-07: Enum через VARCHAR+CHECK (миграционная гибкость)"
+    security:
+      - "DEC-SEC-001: ±0.5% USDT + двойная сверка GET-API для ЮKassa"
+      - "DEC-SEC-002: 2FA TOTP обязателен для всех админ-ролей"
+      - "DEC-SEC-003: PII redaction перед Anthropic (regex + presidio Phase 2)"
+      - "DEC-SEC-004: PostgreSQL primary в РФ (Selectel/VK/Yandex рекомендация)"
+      - "DEC-SEC-006: AES-256-GCM для KYC (field-level encryption)"
+      - "DEC-SEC-007: Listener индексирует ТОЛЬКО при law_accepted + opt-out /optout_kb"
+    ai:
+      - "DEC-AI-001: Embedding voyage-3 (1536d) основной, Anthropic emb — fallback"
+      - "DEC-AI-002: Listener индексирует только consent=true"
+      - "DEC-AI-003: Matching НЕ кэшируется; KB answer кэш 6ч"
+      - "DEC-AI-004: Cost cap soft $1.50 / warn $2.00 / hard block $3.00 per user/мес"
+      - "DEC-AI-005: Digest REDUCE Opus только при high_impact, иначе Sonnet"
+
+  artifacts:
+    architect:
+      - "docs/architecture/workspace.dsl"
+      - "docs/architecture/constraints.yaml"
+      - "docs/architecture/dependency-rules.yaml"
+      - "docs/architecture/fitness-functions.yaml"
+      - "docs/architecture/overview.md + c4-diagrams.md + tech-stack.md + nfr-specs.md"
+      - "docs/architecture/adrs/ADR-001..008-*.md"
+      - "docs/interface/interface-rules.yaml + visual-regression-config.yaml"
+    data:
+      - "docs/architecture/data/er-diagram.md (6 Mermaid)"
+      - "docs/architecture/data/schemas.md (35 таблиц с DDL)"
+      - "docs/architecture/data/migrations-plan.md"
+      - "docs/interface/openapi.yaml (30 endpoints)"
+      - "docs/architecture/data/event-storming.md (35 events)"
+    security:
+      - "docs/architecture/security/threat-model.md (STRIDE × 10 contexts)"
+      - "docs/architecture/security/owasp-top-10-checks.md"
+      - "docs/architecture/security/payments-security.md"
+      - "docs/architecture/security/ai-security.md"
+      - "docs/architecture/security/privacy-compliance.md"
+      - "docs/architecture/security/secrets-management.md"
+    ai:
+      - "docs/architecture/ai/ai-architecture.md"
+      - "docs/architecture/ai/matching-system.md"
+      - "docs/architecture/ai/rag-system.md"
+      - "docs/architecture/ai/digest-system.md"
+      - "docs/architecture/ai/model-router.md"
+      - "docs/architecture/ai/cost-tracking.md"
+      - "docs/architecture/ai/prompts-library.md"
+
+  dependencies_for_next:
+    phase_5_5_ddd_generation:
+      - "13 bounded contexts из ADR-002 → CLAUDE.md для каждого"
+      - "Layer rules из constraints.yaml → Domain/Application/Infrastructure/Presentation containers"
+      - "dependency-rules.yaml → правила импортов для DDD Component Agents"
+      - "Ubiquitous Language извлечь из BA processes-overview"
+    phase_6_development:
+      - "openapi.yaml как контракт между frontend и backend"
+      - "fitness-functions.yaml в CI pipeline"
+      - "component-stories-spec → Storybook stories"
+      - "Threat mitigations в коде (webhook signature, 2FA, RBAC permission classes)"
+      - "AI prompts library + model router AIClient контракт"
+
+  blockers:
+    high:
+      - "Юр. согласование закона клуба + privacy policy (152-ФЗ + GDPR) — БЛОКИРУЕТ Phase 6"
+      - "Refund policy не определена бизнесом — БЛОКИРУЕТ Phase 6 (152-ФЗ ст.18.1 + ЗоЗПП)"
+      - "Уведомление Роскомнадзора об обработке ПДн"
+    medium:
+      - "USDT-провайдер не выбран (Architect/DevOps до Phase 1 coding)"
+      - "Хостинг РФ vs зарубежный не выбран (DEC-SEC-004 рекомендует РФ)"
+    low:
+      - "OD-CLUB-01..03 (пороги звёзд, деградация) — workaround DEC-012 через config"
+
+  next_phase: "Phase 5.5 — DDD Agent Generation (опционально) → Phase 6 Development"
+
+  next_actions:
+    option_a:
+      title: "Запустить Phase 5.5 DDD Agent Generation"
+      description: "Создать CLAUDE.md для 13 bounded contexts + layer Containers + Quality Container. Реализация в Phase 6 пойдёт через DDD-агентов (rule 09)."
+      pros: ["Чёткая декомпозиция", "Component-level атомарность", "Quality Container защищает Dependency Rule"]
+      cons: ["Время на генерацию", "Усложнение если команда мала"]
+    option_b:
+      title: "Перейти сразу к Phase 6 классическим режимом"
+      description: "Dev → Coder → Review цикл без DDD-агентов"
+      pros: ["Быстрее старт", "Меньше промежуточных артефактов"]
+      cons: ["Меньше структурной защиты от нарушений архитектуры"]

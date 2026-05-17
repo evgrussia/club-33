@@ -1,0 +1,111 @@
+decisions_log:
+  created_at: "2026-05-15"
+  source: "Ответы пользователя на открытые вопросы ТЗ §26 (Decisions с разработчиком)"
+
+  decisions:
+    - id: "DEC-005"
+      area: "Admin roles"
+      decision: "Многоуровневые админ-роли: super / модератор / support"
+      rationale: "Разграничение прав: super — финансы, lifetime, конвертер; модератор — заявки, жалобы, респекты; support — поддержка пользователей"
+      impact:
+        - "Architect/Data: модель Admin/Role с уровнями"
+        - "Security: RBAC в админке"
+        - "Coder: декораторы прав доступа на endpoints/views"
+
+    - id: "DEC-006"
+      area: "Mini-app stack"
+      decision: "Telegram WebApp на React 18 + Vite 6"
+      rationale: "Соответствует целевому стеку CLAUDE.md, переиспользование UI-компонентов с web-админкой, удобство развития"
+      impact:
+        - "UI/UX: единая дизайн-система для админки и mini-app"
+        - "Coder: монорепо с двумя frontend-приложениями или общая core-библиотека компонентов"
+        - "DevOps: общий build pipeline"
+
+    - id: "DEC-007"
+      area: "UI reference"
+      decision: "Combat-бот ОТКЛОНЁН как UI-референс (не найден в открытых источниках)"
+      rationale: "Решение пользователя 2026-05-15. Используем альтернативы: TelegramUI (UI-kit), Lunchclub (матчинг), Perplexity (RAG с цитатами), Notion/GitHub digest, Reddit (анонимные жалобы)"
+      impact:
+        - "UX/UI Agent: ориентируется на TelegramUI + Lunchclub + Perplexity паттерны"
+        - "Research references-uxui.md — раздел Combat помечен как unused"
+
+    - id: "DEC-008"
+      area: "AI orchestration"
+      decision: "Оркестрация моделей Anthropic под задачи: быстрая / умная / embedding"
+      rationale: "Контроль стоимости inference при сохранении качества"
+      mapping:
+        fast: "claude-haiku-4-5 — короткие ответы бота, простой digest, классификация"
+        smart: "claude-sonnet-4-6 / claude-opus-4-7 — матчинг (rerank + объяснения), глубокий RAG, сложный digest"
+        embedding: "voyage-3 или Anthropic embeddings — pgvector 1536 dim для KB и профилей"
+      impact:
+        - "AI-Agents Agent: спроектировать router моделей с fallback и cost tracking"
+        - "Skill anthropic-claude-orchestration: создать в Phase 5 (Architecture)"
+        - "ai_usage_log таблица: tokens_in/out по модели, cost_usd"
+
+    - id: "DEC-009"
+      area: "Calendar"
+      decision: "Разрабатываем СВОЁ решение club33calendar в рамках MVP (Phase 1)"
+      rationale: "Решение пользователя 2026-05-15. Готового модуля нет; делаем минимальный собственный (слоты основателя, бронирование, напоминалки, интеграция с FSM бота)"
+      impact:
+        - "Architect/Dev: модуль calendar в Phase 1 scope"
+        - "Минимальная модель: TimeSlot, Booking, Reminder; календарь основателя"
+        - "Bot: /book → доступные слоты → подтверждение; cron-напоминалки"
+        - "Mini-app: экран выбора слота"
+      fallback: "Если разработка не успевает к Phase 1 deadline → временно Calendly. Решение Architect Agent на Phase 5."
+
+    - id: "DEC-010"
+      area: "USD→RUB rate"
+      decision: "Forex API как источник курса на момент создания ЮKassa-инвойса"
+      rationale: "Прозрачный, рыночный курс с фиксацией в момент выставления счёта"
+      impact:
+        - "Architect/Data: payments.invoice_rate_snapshot — фиксировать курс при создании"
+        - "Coder: интеграция с forex-провайдером"
+      open_subquestion: "Конкретный провайдер: ЦБ РФ (бесплатный, дневной курс), openexchangerates.org, exchangerate.host, forex-py. По умолчанию — ЦБ РФ (надёжно, no-cost)"
+
+    - id: "DEC-018"
+      area: "Legal — закон клуба + privacy policy"
+      decision: "Working draft Content Agent → юр. согласование (≤2 нед) параллельно с Phase 6. Production deploy ждёт юр.одобрения. Версионирование через law_versions + law_acceptances.version_id."
+      rationale: "ADR-009 §1, утверждено пользователем 2026-05-17. Не блокирует разработку, блокирует production."
+      ref_adr: "ADR-009"
+
+    - id: "DEC-019"
+      area: "Refund policy"
+      decision: "До интервью — полный возврат (7 дней). <14 дней — pro-rated. ≥14 дней / lifetime / бан — невозвратно. Чекбокс на оплате + строка в законе. Действие через Super-админа."
+      rationale: "ADR-009 §2, утверждено 2026-05-17. Соответствует ЗоЗПП ст. 32."
+      impact:
+        - "Data: добавить таблицу payment_refunds"
+        - "Coder: endpoint POST /api/v1/admin/payments/{id}/refund (Super only)"
+      ref_adr: "ADR-009"
+
+    - id: "DEC-020"
+      area: "Roskomnadzor notification"
+      decision: "Уведомление подаёт заказчик через портал Роскомнадзора (форма Р) до production deploy. Orchestrator готовит шаблон в Phase 6."
+      rationale: "ADR-009 §3, 152-ФЗ, утверждено 2026-05-17."
+      ref_adr: "ADR-009"
+
+    - id: "DEC-021"
+      area: "USDT provider"
+      decision: "Cryptomus как основной USDT-провайдер (TRC20 + TON). HMAC-SHA256 webhook signature. Fee ~0.4%. Adapter payments/adapters/cryptomus.py."
+      rationale: "ADR-009 §4, утверждено 2026-05-17. RU локализация, обе сети, удобный API."
+      impact:
+        - "Data: webhook_log.provider enum +'cryptomus'"
+        - "Architect: ADR-004 дополнить Cryptomus details"
+        - "Security: payments-security.md обновить HMAC Cryptomus"
+        - "Confirmations: TRC20=19, TON=1"
+      ref_adr: "ADR-009"
+
+    - id: "DEC-022"
+      area: "Hosting"
+      decision: "Selectel (РФ): managed PostgreSQL, S3 backups, VPS API/Worker/Listener. ~12-15k₽/мес MVP."
+      rationale: "ADR-009 §5, 152-ФЗ ст.18 п.5, утверждено 2026-05-17."
+      impact:
+        - "DevOps Phase 8: Terraform/Ansible под Selectel"
+        - "SRE: мониторинг (Selectel stack или Grafana Cloud)"
+      ref_adr: "ADR-009"
+
+  remaining_open_questions:
+    with_club_team:
+      - "Коэффициент деградации балла репутации в месяц (workaround: конфигурируемо в админке — DEC-012)"
+      - "Пороги звёзд 0★/1★/2★/3★/4★ (workaround: конфигурируемо — DEC-012)"
+      - "Механизм падения от неактивности (60 дней vs N сообщений — workaround: конфигурируемо)"
+      - "Финальный текст «Закона клуба» + фраза согласия (DEC-018: юр. согласование)"

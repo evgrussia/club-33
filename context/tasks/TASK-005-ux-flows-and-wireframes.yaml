@@ -1,0 +1,194 @@
+task:
+  id: "TASK-005"
+  file: "TASK-005-ux-flows-and-wireframes.yaml"
+
+  request:
+    agent: "UX"
+    type: "create"
+    priority: "critical"
+    created_at: "2026-05-15"
+    phase: "Design"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-002", "TASK-004"]
+    checkpoint_ref: "CP-001-discovery-2026-05-15"
+
+    input:
+      summary: |
+        Создать user flows и low-fidelity wireframes для всех ключевых сценариев
+        «Клуба 33». Покрыть Phase 1/2/3 как единый план. Основа — 52 User Stories
+        (TASK-001), 12 бизнес-процессов с FSM (TASK-004), 8 экранов из Research
+        references-uxui.md. Учесть DEC-007 (Combat отклонён, использовать
+        Lunchclub/Perplexity/TelegramUI паттерны).
+      references:
+        - "docs/discovery/user-stories.md"
+        - "docs/discovery/business/processes-overview.md"
+        - "docs/discovery/business/funnel-process.md"
+        - "docs/discovery/business/respects-complaints-process.md"
+        - "docs/discovery/business/time-economy-process.md"
+        - "docs/discovery/research/references-uxui.md"
+        - "context/decisions.yaml"
+      constraints:
+        - "Mini-app — React 18 + Vite 6 + TelegramUI (DEC-006, DEC-R-001)"
+        - "Тон «на ты», дружелюбный, короткий"
+        - "Закон клуба — ручной ввод (не кнопка)"
+        - "Match-карточки с reasoning (DEC-R-002)"
+        - "RAG-ответы с source-цитатами (DEC-R-003)"
+        - "Без downvote (DEC-R-005)"
+        - "Поддерживать light/dark Telegram theme params"
+
+    expected_output:
+      deliverables:
+        - "docs/design/ux/user-flows.md"
+        - "docs/design/ux/information-architecture.md"
+        - "docs/design/ux/wireframes-bot.md"
+        - "docs/design/ux/wireframes-miniapp.md"
+        - "docs/design/ux/wireframes-admin.md"
+        - "docs/design/ux/accessibility-checklist.md"
+      format: "ux_summary"
+      quality_criteria:
+        - "User flows для всех 7 эпиков (Воронка, Платежи, Доступ, Социал, Время, AI, Админка)"
+        - "IA (sitemap) для бота, mini-app, web-админки"
+        - "Wireframes (ASCII или markdown-описание) для 8+ ключевых экранов mini-app"
+        - "Wireframes для web-админки (Пользователи, Заявки, Очередь интервью, Роли, Жалобы, Финансы, Воронка, AI-дашборд)"
+        - "Wireframes ключевых dialog-флоу бота (/start, оплата, закон клуба, /match, /ask)"
+        - "Accessibility checklist (контрастность, haptic feedback, native MainButton/BackButton)"
+        - "UI-feedback механизм для match quality и KB usefulness (из next_steps Analytics)"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "single-session"
+    checkpoint_ref: "CP-001-discovery-2026-05-15"
+
+    output:
+      summary: |
+        Созданы 6 артефактов для всех 7 эпиков (Воронка, Платежи, Доступ, Социал,
+        Время, AI, Админка) на трёх поверхностях (бот, mini-app, web-админка).
+        Покрыты Phase 1/2/3 как единый план: 18 user flows, sitemap для 3
+        поверхностей, 17 wireframes бота, 10 wireframes mini-app, 13 разделов
+        web-админки, accessibility-чеклист WCAG AA с UI-feedback механизмами.
+      artifacts:
+        - path: "docs/design/ux/user-flows.md"
+          description: "18 user flows по 7 эпикам с edge cases и сквозными правилами"
+        - path: "docs/design/ux/information-architecture.md"
+          description: "Sitemap бота (13 команд + FSM 14 состояний), mini-app (5 tabs + 8 разделов), админки (11 разделов + RBAC)"
+        - path: "docs/design/ux/wireframes-bot.md"
+          description: "17 ASCII-wireframes ключевых dialog-флоу бота"
+        - path: "docs/design/ux/wireframes-miniapp.md"
+          description: "10 wireframes mini-app (Home, Profile, Respect, Gift, Match, Ask, Digest, Complaint, Booking) с TelegramUI native"
+        - path: "docs/design/ux/wireframes-admin.md"
+          description: "13 разделов web-админки с RBAC-матрицей (super/mod/support)"
+        - path: "docs/design/ux/accessibility-checklist.md"
+          description: "WCAG AA, haptic, MainButton/BackButton, theme params, reduced motion, UI-feedback"
+      decisions:
+        - id: "DEC-UX-001"
+          decision: "Tab bar mini-app — 5 секций (Home, Profile, Социал, Поиск, База); Дары вынесены в Home/quick-actions для Ф3"
+          rationale: "Telegram WebApp UX лучше работает с 3–5 табами; Дары — Phase 3 фича, не загромождать MVP-навигацию"
+        - id: "DEC-UX-002"
+          decision: "Закон клуба — отдельный экран с явной плашкой «Кнопки «Согласен» нет специально» + текстовое поле"
+          rationale: "Соответствует ТЗ §15 и project-brief constraints; ручной ввод фразы — осознанное согласие"
+        - id: "DEC-UX-003"
+          decision: "Match-результаты — карточка с avatar/имя/роль/★ + 1-2 строки reasoning + [Написать в TG] (Lunchclub-паттерн)"
+          rationale: "DEC-R-002 Lunchclub-паттерн; Combat отклонён DEC-007"
+        - id: "DEC-UX-004"
+          decision: "Ответы /ask — Perplexity-style с footnotes [1][2][3], кликабельные, раскрывают source"
+          rationale: "DEC-R-003 RAG с цитатами; прозрачность для KB"
+        - id: "DEC-UX-005"
+          decision: "Feedback везде нейтральный 3-значный («полезно/нейтрально/мимо»), без жёсткого downvote"
+          rationale: "DEC-R-005; снижает страх соц-наказания, улучшает honest feedback"
+        - id: "DEC-UX-006"
+          decision: "Анонимность респекта в mini-app History: тапа «полученные» имя дарителя не показано; ник админ видит"
+          rationale: "US-027 — пользователь не должен видеть, кто дал; админ — для аудита"
+        - id: "DEC-UX-007"
+          decision: "Sidebar админки скрывает пункты по RBAC (не disabled), чтобы не плодить серые кнопки"
+          rationale: "Чище UX для не-super ролей (mod/support)"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "User flows для всех 7 эпиков (18 flows): passed"
+        - "IA для бота, mini-app, web-админки: passed"
+        - "Wireframes ≥ 8 экранов mini-app (создано 10): passed"
+        - "Wireframes web-админки (13 разделов): passed"
+        - "Wireframes ключевых dialog-флоу бота (17): passed"
+        - "Accessibility checklist (WCAG AA, haptic, native, theme): passed"
+        - "UI-feedback механизм для match quality и KB usefulness: passed"
+
+    issues:
+      - severity: "medium"
+        description: "Ник дарителя в /gift-уведомлении получателю — open question (MVP-решение: показывать). Подтвердить у команды клуба."
+        recommendation: "Content Agent — финальная формулировка; Product Agent — окончательное решение по анонимности дарителя."
+      - severity: "low"
+        description: "Точные пороги звёзд (0–4) и формула репутации — open question с командой клуба. Wireframes показывают абстрактные «★★★»."
+        recommendation: "Не блокирует Design; уточнить с командой клуба до старта Phase 6 (US-030, US-031)."
+      - severity: "low"
+        description: "Календарная сетка club33calendar в mini-app — простой mock; Architect Agent уточнит модель (TimeSlot, Booking) в Phase 5."
+        recommendation: "UI Agent (TASK-006) задизайнит финальный компонент; UX-обвязка готова."
+
+    next_steps:
+      - action: "UI Agent создаёт design system + component-stories-spec.md на основе wireframes"
+        agent: "UI"
+        priority: "high"
+      - action: "Content Agent пишет финальные тексты бота, mini-app, error states, текст закона клуба"
+        agent: "Content"
+        priority: "high"
+      - action: "Architect Agent учитывает club33calendar модель (DEC-009) и матрицу RBAC при дизайне API"
+        agent: "Architect"
+        priority: "medium"
+
+    agent_data:
+      format: "ux_summary"
+      content:
+        flows_total: 18
+        flows_by_epic:
+          funnel: 2
+          payments: 3
+          access: 2
+          social: 3
+          time: 3
+          ai: 3
+          admin: 9
+        ia:
+          bot:
+            commands: 13
+            fsm_states: 14
+            inline_button_contexts: 12
+          miniapp:
+            tabs: 5
+            screens: 10
+            native_elements: ["MainButton", "BackButton", "HapticFeedback", "themeParams", "expand", "closingConfirmation"]
+          admin:
+            sections: 11
+            rbac_roles: ["super", "mod", "support"]
+        wireframes:
+          bot_screens: 17
+          miniapp_screens: 10
+          admin_screens: 13
+        key_patterns:
+          - "Lunchclub-style match cards с reasoning + CTA (DEC-R-002)"
+          - "Perplexity-style RAG-ответы с footnotes [1][2][3] (DEC-R-003)"
+          - "TelegramUI native: MainButton/BackButton/Haptic везде в mini-app"
+          - "Закон клуба: ручной ввод фразы, без кнопки «Согласен»"
+          - "Анонимность респекта в UI получателя; модератор видит всё"
+          - "Жалоба — анонимна для получателя"
+          - "Sidebar админки скрывает пункты по RBAC (не disable)"
+        accessibility:
+          wcag_level: "AA"
+          contrast_min: "4.5:1 text / 3:1 ui"
+          touch_target_miniapp: "44pt"
+          touch_target_admin: "32-40px"
+          reduced_motion: true
+          theme_params_used: ["bg_color", "secondary_bg_color", "text_color", "hint_color", "link_color", "button_color", "button_text_color", "destructive_text_color"]
+        ui_feedback:
+          match_quality: "5-балльная ⭐ + 3-значный label, через 1 час"
+          kb_usefulness: "Бинарно 👍/🤔 сразу под ответом"
+          no_harsh_downvote: true
+        open_questions_resolved_locally:
+          - "Tab bar mini-app: 5 tabs (Home/Profile/Социал/Поиск/База), Дары — в quick-actions"
+          - "Feedback везде нейтральный 3-значный"
+        open_questions_remain:
+          - "Анонимность дарителя в /gift (MVP: показываем имя)"
+          - "Пороги звёзд 0–4 и формула репутации (команда клуба)"
+
+    signature: "UX Agent"

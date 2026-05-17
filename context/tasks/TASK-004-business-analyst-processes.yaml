@@ -1,0 +1,168 @@
+task:
+  id: "TASK-004"
+  file: "TASK-004-business-analyst-processes.yaml"
+
+  request:
+    agent: "Business-Analyst"
+    type: "create"
+    priority: "high"
+    created_at: "2026-05-15"
+    phase: "Discovery"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: []
+    checkpoint_ref: "CP-000-intake-2026-05-15"
+
+    input:
+      summary: |
+        Формализация бизнес-процессов: воронка приёма участника (анкета → скрининг →
+        одобрение → оплата → интервью → закон клуба → invite), процесс модерации
+        жалоб, процесс дара/сжигания дней, процесс назначения роли и KYC,
+        процесс продления подписки, процесс работы консьерж-сервиса.
+        BPMN-диаграммы или текстовые swim-lane.
+      references:
+        - "docs/Club 33 — ТЗ v5 (финал, 2026-05-05).pdf"
+        - "context/project-brief.yaml"
+      constraints:
+        - "Каждый процесс: actors, trigger, шаги, исключения, SLA"
+        - "Особое внимание FSM-состояниям бота из §17 ТЗ"
+        - "Покрыть нестандартные ситуации (§21): нет подтверждения 10+ мин, неверная сумма"
+
+    expected_output:
+      deliverables:
+        - "docs/discovery/business/processes-overview.md"
+        - "docs/discovery/business/funnel-process.md"
+        - "docs/discovery/business/respects-complaints-process.md"
+        - "docs/discovery/business/time-economy-process.md"
+        - "docs/discovery/business/payment-process.md"
+      format: "business_analyst_summary"
+      quality_criteria:
+        - "Все 7+ бизнес-процессов формализованы со swim-lane (или BPMN)"
+        - "FSM-состояния бота явно зафиксированы"
+        - "Исключения и SLA описаны для каждого процесса"
+        - "Бизнес-правила (например, 30 дней до конца подписки для дара) явно выделены"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "~1h"
+    checkpoint_ref: null
+
+    output:
+      summary: |
+        Формализовано 12 бизнес-процессов в 5 markdown-документах со swim-lane,
+        FSM-состояниями и SLA. Описаны нестандартные ситуации (§21 ТЗ),
+        RBAC-матрица по DEC-005, события AuditLog. Зафиксированы открытые
+        вопросы для команды клуба (пороги звёзд, деградация, политика возвратов).
+      artifacts:
+        - path: "docs/discovery/business/processes-overview.md"
+          description: "Глоссарий, карта 12 процессов, FSM-карта, RBAC-матрица, SLA"
+        - path: "docs/discovery/business/funnel-process.md"
+          description: "Воронка приёма: /start → invite_used; продление подписки; FSM из §17 ТЗ"
+        - path: "docs/discovery/business/respects-complaints-process.md"
+          description: "Респекты (4 канала, лимиты), жалобы (анонимность, модерация), звёзды 0–4★, роли, KYC-флаг"
+        - path: "docs/discovery/business/time-economy-process.md"
+          description: "Дар времени (/gift), сжигание (/burn), lifetime-бюджет 33 дня/год, админ-конвертер USD↔дни"
+        - path: "docs/discovery/business/payment-process.md"
+          description: "USDT/ЮKassa/СБП, идемпотентность webhook, нестандартные ситуации §21, RBAC"
+      decisions:
+        - id: "DEC-BA-001"
+          decision: "Защитный остаток 30 дней применяется к /gift и /burn (а не только к /gift)"
+          rationale: "Симметрично защищает от случайного «вылета» при сжигании; явно зафиксировано в time-economy-process.md"
+        - id: "DEC-BA-002"
+          decision: "Продление подписки накапливается к старой end_date, а не от даты платежа"
+          rationale: "Поощряет ранние продления и не штрафует тех, кто платит заранее"
+        - id: "DEC-BA-003"
+          decision: "Lifetime-участник НЕ может сжигать дни (/burn запрещён)"
+          rationale: "У lifetime нет основной подписки, а годовой бюджет 33 дня — это «подарок от клуба», не его собственность"
+        - id: "DEC-BA-004"
+          decision: "СБП-подтверждение — только Support-админ и Super-админ; модератор не может"
+          rationale: "Финансовое действие, разграничение по DEC-005"
+        - id: "DEC-BA-005"
+          decision: "Поздний webhook (после expires_at) НЕ закрывает инвойс автоматически — создаёт late_payment_review для Super-админа"
+          rationale: "Защита от неожиданного зачисления и спорных ситуаций"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Все 7+ (фактически 12) бизнес-процессов формализованы со swim-lane: passed"
+        - "FSM-состояния бота из §17 ТЗ явно зафиксированы (14 состояний + переходы): passed"
+        - "Исключения и SLA описаны для каждого процесса: passed"
+        - "Бизнес-правила (30 дней до конца подписки, 30 респектов/мес, 33 дня lifetime-бюджет, ±0.5% сумма USDT) явно выделены: passed"
+        - "Нестандартные ситуации §21 покрыты в payment-process.md: passed"
+        - "RBAC по DEC-005 встроен в каждый процесс: passed"
+
+    issues:
+      - severity: "medium"
+        description: "PDF ТЗ не читается напрямую (отсутствует pdftoppm); работа опиралась на project-brief.yaml, decisions.yaml и prd.md"
+        recommendation: "Architect Agent должен сверить тонкие моменты §17 (FSM) и §21 (нестандартные ситуации) напрямую по PDF при наличии инструмента"
+      - severity: "low"
+        description: "Звёзды и репутация — пороги, деградация, неактивность — TBD с командой клуба"
+        recommendation: "Включить в список вопросов для следующей сессии с командой; зафиксировано в processes-overview.md и respects-complaints-process.md"
+      - severity: "low"
+        description: "Политика возвратов формально не прописана"
+        recommendation: "Сделать черновик политики возвратов перед запуском Phase 1 (Architect + Product)"
+
+    next_steps:
+      - action: "Architect Agent: спроектировать модель данных под FSM, time_gifts, day_burns, admin_day_adjustments, invoice states"
+        agent: "Architect"
+        priority: "high"
+      - action: "Data Agent: ER-диаграмма + API контракты с учётом RBAC из DEC-005"
+        agent: "Data"
+        priority: "high"
+      - action: "Security Agent: threat model оплат (webhook signature, идемпотентность, повторные попытки)"
+        agent: "Security"
+        priority: "high"
+      - action: "Content Agent: тексты уведомлений (отказ заявки, late_payment, благодарность за /burn, отказ респекта)"
+        agent: "Content"
+        priority: "medium"
+      - action: "Уточнить с командой клуба: пороги звёзд, коэффициент деградации, политика возвратов"
+        agent: "Orchestrator"
+        priority: "medium"
+
+    agent_data:
+      format: "business_analyst_summary"
+      content:
+        processes_total: 12
+        processes_by_phase:
+          phase_1: ["Воронка приёма", "Продление подписки", "Платежи USDT", "Платежи ЮKassa", "Платежи СБП"]
+          phase_2: ["Респекты", "Жалобы", "Звёзды и репутация", "Роли (ниши)", "KYC-флаг"]
+          phase_3: ["Дар времени", "Сжигание дней", "Lifetime-бюджет", "Админ-конвертер USD↔дни", "Реакция-стикер для респекта"]
+        fsm_states_documented: 14
+        swim_lanes_total: 16
+        critical_business_rules:
+          - "30 дней — защитный остаток для /gift и /burn"
+          - "30 респектов/мес, 3 на одного получателя, сброс 1-го числа 00:00 МСК"
+          - "33 дня — годовой lifetime-бюджет дарения, сброс 1 января 00:00 МСК"
+          - "1 день = 2.5 USD (фиксированный курс админ-конвертера)"
+          - "Курс USD→RUB фиксируется в момент создания инвойса (forex API)"
+          - "Идемпотентность webhook по external_id — обязательна"
+          - "СБП-подтверждение: только Support или Super (DEC-005)"
+          - "Закон клуба — ручной ввод фразы, не кнопка"
+        rbac_matrix_complete: true
+        sla_documented: true
+        edge_cases_covered:
+          - "Underpaid / Overpaid USDT (±0.5%)"
+          - "Late payment после expires_at"
+          - "Дубликат webhook (idempotency)"
+          - "No-show на интервью"
+          - "Отказ от закона клуба"
+          - "Спам стикеров-реакций"
+          - "Жалоба на жалобу (эскалация Super)"
+        open_questions:
+          with_club_team:
+            - "Пороги 0★/1★/2★/3★/4★"
+            - "Коэффициент месячной деградации балла"
+            - "Механизм падения от неактивности (60 дней vs N сообщений)"
+            - "Серьёзность жалоб (категории) и пенальти"
+            - "Поведение системы при 0★ (mute/kick/ручное)"
+          with_business:
+            - "Политика возвратов (full / pro-rated / non-refundable)"
+            - "Срок late_payment (14 дней по умолчанию?)"
+            - "Auto-конвертация overpaid в дни vs ручное"
+        references_aac_ifac:
+          - "Все процессы логируются через AuditLogService (rule 04-logging.md)"
+          - "FSM-переходы → log_event('fsm_transition')"
+          - "Admin-действия (lifetime, конвертер, СБП) → log_business"
+
+    signature: "Business-Analyst Agent"

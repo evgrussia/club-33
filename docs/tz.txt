@@ -1,0 +1,524 @@
+ 
+
+Telegram- « 33» --  ,  ,   
+AI-
+
+1.  
+
+ Telegram-  web-, :
+
+   1.    ;
+   2.     Google-    ;
+   3.     ;
+   4.     webhook;
+   5.  bio       AI-;
+   6.        ;
+   7.   invite-      ;
+   8.    : , , , ;
+   9.    :   , ,
+
+         lifetime-;
+   10.  AI-:  ,    , 
+
+          ;
+   11.      ;
+   12.    ;
+   13.   web-  CRUD ,  , 
+
+           .
+
+2.   
+
+  :
+
+   ·   -- , , ;
+   ·   --  ;
+   · - --       ;
+   · mini-app  Telegram --   (, ,  , ,
+
+         ).
+
+ =  , , ,     .
+
+3.  
+
+ «». , ,   «».
+4.                   
+
+4.1  
+                   
+
+6                    1000 USD
+12                   1500 USD
+
+4.2 Lifetime
+ .    .
+
+4.3   .
+
+5.    
+
+ : USDT, , Kassa.
+
+  USDT:
+
+   · TRC20
+   · TON
+
+      .
+
+Kassa --      .   USD  RUB  
+   (  --    ).
+
+:
+
+   ·     webhook (USDT, Kassa);
+   ·  --      (  , 
+
+         );
+   ·   : 5­10 ;
+   ·         ().
+
+6.  
+
+       :
+
+   1. /start   --      « ».
+   2.  « »  Google-.  :  (Instagram,
+
+         Telegram), ,  ,    (),  , 
+            ,      .
+   3.        -.
+   4.      (Instagram, Telegram, ).
+   5.      .
+   6.     -- ,      
+          .    .
+
+   7.      .
+   8.        .
+   9.   ,     ( USDT).
+   10.   .
+   11.    webhook .
+   12.     .
+   13.          
+
+            --   bio  AI-.
+   14.   ,   .
+   15.        --   .
+   16.        .
+   17.    --         .
+   18.    invite-    .
+   19. :  , , , .
+
+7.   
+
+       ( ,  ,  
+ ):
+
+   ·     « » ( ,  
+             ,     
+          AI-);
+
+   ·          ( 
+          ).   --   ,   
+         ;
+
+   ·      invite-    .
+
+ « » --  ,   .
+
+8.     
+
+     :
+
+   ·  «  »;
+   ·  «  ».
+
+ --  invite-:
+
+   · : 1 ;
+   ·  : 24  ().
+
+      .
+
+ «  »    .
+9.  
+
+   ·   =   =  (, ,   . .).
+   ·      .    .
+   ·         .
+   ·      -- 0 .
+   ·       .
+
+10. KYC-
+
+   · ,  ,    (,  
+         ).
+
+   ·        .
+   · Self-service KYC       -- KYC 
+
+         .
+
+11. 
+
+:  0  4.    ,    
+ .           
+().
+
+11.1  
+   ·    = +1  .
+   ·     --      
+         .
+   ·   (   0/1/2/3/4) --   
+         .       .
+
+11.2   
+
+ 60    ,     --     ( 
+ 0).    (60       ) --
+   .
+
+12. 
+
+12.1  
+   · 30     .
+   ·     30 ( ) -- 1-     00:00
+         .
+   ·    : 3  .
+
+12.2  
+   ·  Telegram mini-app ( -- Combat-).
+   ·    .
+   ·   .
+   · -   ( 3).       
+         ,    .
+
+12.3  
+   ·   .
+   ·  --  .
+   ·  -- ,    « 33».
+
+12.4   
+   ·    (.  ).
+   ·      .
+
+12.5 
+
+         .
+
+13. 
+
+   ·           mini-app.
+          .
+
+   ·     ,    .   
+         ,  .
+
+   ·    -- «»  «».
+   · «» --       .   
+
+            ,   .    
+         .
+   · «» --   ,   .
+
+14.  
+
+14.1  
+   · 1   = 2.5 USD.
+   ·     .  --  .
+   · :     30        
+          .  30    --  ,   .
+   ·     ,     .
+   ·    /gift      .
+
+14.2 Lifetime-
+
+       -- 33   .
+
+14.3  
+
+     --    ,    .
+ /burn   .
+14.4  
+
+     (, , ,  ) 
+     mini-app.
+
+14.5  « -- »  
+
+     --    .   
+    .      
+.
+
+15. AI-
+
+ -- Anthropic (Claude).     
+  Anthropic    ( /  / embedding). 
+ --    .
+
+15.1 
+   ·  :   ,       
+          3   .
+   · :  /match    mini-app -.
+   ·   embedding:   (, bio  , 
+         ) +   (     ).
+
+15.2   (RAG)
+   · Listener-   .
+   ·       KB    +   ,   .
+   ·       « »,  
+           .
+
+15.3   (digest)
+   · Cron 1   : LLM-summarization   .
+   ·  ,  ,  , .
+   ·       .
+
+16. Mini-app  Telegram
+
+   · : Telegram WebApp (HTML/JS  Telegram).
+   · : , ,  , , digest, .
+   · JWT-   init_data Telegram.    .
+   ·     --     (React + Vite 
+
+          HTML).
+
+17. FSM   
+
+    :
+
+   · « » --  ,    ;
+   · «   » --   ,  
+               ;
+
+   · « » --    ,   invite.
+
+ :
+
+   · /start --     ;
+   · /respect --  mini-app  « »,   ;
+   · /gift --  mini-app  « »,   ;
+   · /burn --      ;
+   · /match -- AI-;
+   · /ask --    ;
+   · /digest --   ;
+   ·     --   « ».
+
+  mini-app --     web_app.
+
+18.  
+
+ « » :
+
+   ·  /  / lifetime;
+   ·  ;
+   ·  .
+
+      10  --  ().
+
+19. 
+
+       .    -- 
+  .
+
+ - :
+
+   ·   ;
+   ·  ;
+   ·  ,  .
+
+20. -
+
+ « »:
+
+   ·   ;
+   ·   ;
+   ·    .
+
+ « »:  , , , .  «   
+».
+21. 
+
+     /  .   
+    -.
+
+   ,  24/7.     .
+
+ 
+   ·     10  --  «»;
+   ·   --  «»;
+   ·     --  «»,  
+         .
+
+22. Web-
+
+  .
+
+22.1 
+
+  username  telegram id.  :
+
+   · , ,  ,  ,  ;
+   · , ,  ,  ,  ;
+   · LTV (  confirmed-),  ,  ,
+
+             .
+
+:
+
+   ·  lifetime;
+   · ;
+   · ;
+   ·   ;
+   ·  invite-.
+
+22.2 
+
+ : telegram_id, username,  ,   Google-. :
+«», «», « ».
+
+22.3  
+
+ ,          .
+
+22.4 
+
+CRUD  .      .
+
+22.5  
+
+    «» / «»  .
+22.6  « -- »
+
+    ,   .     
+.  .
+
+22.7 
+   ·  ;
+   ·    ( /  /  /  / );
+   ·   ;
+   ·    ;
+   ·  ;
+   ·  LTV.
+
+22.8 
+
+:  ,  « »,  Google-, , 
+ ,  ,  , ,   ,  ,
+  ,  ,  ,  ,  ,
+ .
+
+: bot_start  payment_completed; approved  payment_completed;
+payment_completed  invite_used. Drop-off   .   
+.
+
+22.9  AI
+
+ ,   ,   inference.
+
+22.10  
+
+:  ,  ,  webhook.
+
+22.11 
+
+CSV / Excel.
+
+22.12  
+
+ -:  ,  ,  ,  ,   
+,  ,  , .
+
+23.  
+
+   : users, applications, payments, sessions.  users
+ : first_payment_at, last_payment_at, total_payments_count,
+total_revenue (LTV), renewals_count, acquisition_source, lifetime_value_calculated_at,
+application_status, role_id, stars.
+
+  (  ):
+   · roles -- id, name, kyc_required, created_at, created_by_admin;
+   · user_roles -- user_id, role_id, stars, kyc_status, assigned_at, assigned_by;
+   · respects -- id, from_user, to_user, amount, reason, source, created_at;
+   · user_monthly_balance -- user_id, month, given_total, given_per_user (json);
+   · complaints -- id, from_user, target_user, reason, status, resolved_by, resolved_at,
+
+         anonymous;
+   · time_gifts -- id, from_user, to_user, days, respect_attached, source_subscription_id,
+
+         created_at;
+   · day_burns -- id, user_id, days, reason, created_at;
+   · admin_day_adjustments -- id, admin_id, user_id, days_delta, usd_equivalent, reason,
+
+         created_at;
+   · member_profiles -- user_id, role_id, competencies, bio, embedding (vector 1536),
+
+         updated_at;
+   · chat_messages -- id, chat_id, tg_message_id, user_id, text, ts, indexed_at;
+   · kb_chunks -- id, source_type, source_id, chunk_text, embedding (vector 1536),
+
+         metadata (json);
+   · daily_summaries -- id, date, summary, open_requests (json), decisions (json);
+   · ai_usage_log -- user_id, feature, tokens_in, tokens_out, cost_usd, ts.
+
+24.  
+
+ 1 --  
+   · /start,  ,    Google-,  .
+   ·  (USDT  , , Kassa).
+   ·    .
+   ·   (, , ).
+   ·      .
+   ·    (   ).
+   ·   invite- ( + ).
+   · : «  », « », « », «»,
+         «».
+   ·  web-: , , , .
+   · : applications, users, payments, sessions.
+
+ 2 --    AI- +  
+   ·   (CRUD  ).
+   ·     .
+   · Mini-app shell (,  ,  ).
+   · : 30  , 3  ,  1- .
+   ·  (  ),   .
+   ·  ( ),      ().
+   ·   (digest 1   ).
+   · AI-:  (/match)    (/ask). Anthropic + .
+
+ 3 --    AI
+   ·   (mini-app , ,  ).
+   ·   (/burn).
+   · Lifetime    (33 ).
+   · :  « -- »,    .
+   · -      .
+
+25. 
+
+  :
+
+   ·   ;
+   ·   ;
+   ·   ;
+   ·   ;
+   ·        ( 4, ).
+
+26.  
+
+  
+   1.      .
+   2.    (   0/1/2/3/4).
+   3.   : 60  « »    ( 
+           ).
+   4.           
+         « ».
+
+ 
+   1.  -:     (super, , support).
+   2. Mini-app : Telegram WebApp + React/Vite   HTML.
+   3. Combat-   mini-app --    UI-.
+   4.  AI-  Anthropic --     .
+   5.     --  club33calendar  Calendly.
+   6.   USD  RUB  Kassa    .
+

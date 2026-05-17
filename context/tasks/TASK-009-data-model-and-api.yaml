@@ -1,0 +1,165 @@
+task:
+  id: "TASK-009"
+  file: "TASK-009-data-model-and-api.yaml"
+
+  request:
+    agent: "Data"
+    type: "create"
+    priority: "critical"
+    created_at: "2026-05-16"
+    phase: "Architecture"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-003", "TASK-004"]
+    checkpoint_ref: "CP-002-design-2026-05-15"
+
+    input:
+      summary: |
+        Создать модель данных и API-контракт для всех 3 фаз «Клуба 33».
+        Включить таблицы из §23 ТЗ + дополнения (events для воронки, fx_rate_snapshot,
+        late_payment_review, calendar модели, match/kb feedback). API в OpenAPI 3.1.
+      references:
+        - "docs/discovery/prd.md"
+        - "docs/discovery/analytics/tracking-plan.md"
+        - "docs/discovery/business/payment-process.md"
+        - "docs/discovery/business/time-economy-process.md"
+        - "docs/discovery/business/respects-complaints-process.md"
+        - "context/decisions.yaml"
+      constraints:
+        - "PostgreSQL 16 + pgvector (embeddings 1536)"
+        - "Django 5 ORM, миграции на каждое изменение"
+        - "Идемпотентность webhook (external_id unique)"
+        - "RBAC поля (DEC-005): admin_role enum (super/mod/support)"
+        - "Все таблицы — created_at/updated_at + soft_delete где нужен"
+
+    expected_output:
+      deliverables:
+        - "docs/architecture/data/er-diagram.md"
+        - "docs/architecture/data/schemas.md"
+        - "docs/architecture/data/migrations-plan.md"
+        - "docs/interface/openapi.yaml"
+        - "docs/architecture/data/event-storming.md"
+      format: "data_summary"
+      quality_criteria:
+        - "Все таблицы из §23 ТЗ покрыты"
+        - "Дополнения: events, fx_rate_snapshot, late_payment_review, time_slots, bookings, match_feedback, kb_feedback"
+        - "ER-диаграмма (Mermaid)"
+        - "OpenAPI 3.1 для всех публичных endpoints (mini-app, admin, bot webhook)"
+        - "Индексы и constraint'ы документированы"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-16"
+    duration: "~3h"
+    checkpoint_ref: null
+
+    output:
+      summary: |
+        Спроектирована полная модель данных Клуба 33 на 3 фазы: 35 таблиц в 11 bounded contexts,
+        ER-диаграмма в Mermaid, детальные DDL-схемы с индексами/constraints, план миграций
+        с зависимостями и стратегией ретенции, OpenAPI 3.1 с 30+ endpoints (mini-app, admin, webhooks),
+        event storming с 35+ domain events для будущей event-driven архитектуры.
+      artifacts:
+        - path: "docs/architecture/data/er-diagram.md"
+          description: "ER-диаграмма (Mermaid) — 6 групп таблиц по контекстам"
+        - path: "docs/architecture/data/schemas.md"
+          description: "DDL-схемы всех 35 таблиц с индексами, FK, constraints, партиционированием"
+        - path: "docs/architecture/data/migrations-plan.md"
+          description: "План миграций Phase 1/2/3, бэкфиллы, ретенция, scheduler tasks"
+        - path: "docs/interface/openapi.yaml"
+          description: "OpenAPI 3.1 — auth, me, payments, webhooks, respects, complaints, gifts, burns, ai, calendar, law, admin"
+        - path: "docs/architecture/data/event-storming.md"
+          description: "Domain Events с payload + source/consumer контекстами + маппинг на analytics events"
+      decisions:
+        - id: "DEC-DATA-01"
+          decision: "Партиционировать events и chat_messages по месяцу через pg_partman"
+          rationale: "Высокий объём (events растёт быстро, RAG-индексация чата); partition pruning ускоряет аналитику и upkeep"
+        - id: "DEC-DATA-02"
+          decision: "pgvector embedding столбцы VECTOR(1536); ivfflat для member_profiles, HNSW для kb_chunks"
+          rationale: "Профилей мало (≤2k) — ivfflat хватает; chunks могут быть 100k+ — HNSW даёт лучший recall/latency"
+        - id: "DEC-DATA-03"
+          decision: "Идемпотентность webhook через UNIQUE (external_id) в webhook_log и payments"
+          rationale: "ЮKassa и USDT провайдеры повторяют webhooks при сбое; уникальный constraint на БД — single source of truth"
+        - id: "DEC-DATA-04"
+          decision: "user_monthly_balance с PRIMARY KEY (user_id, month) + JSONB received_from_counts"
+          rationale: "Лимит 30/мес и 3 на получателя проверяются за O(1); month_key CHAR(7) YYYY-MM партиционирует логически"
+        - id: "DEC-DATA-05"
+          decision: "Subscriptions: partial UNIQUE (user_id) WHERE status='active' + CHECK lifetime⇔end_date IS NULL"
+          rationale: "Гарантия — только одна активная подписка; lifetime моделируется явно через NULL end_date"
+        - id: "DEC-DATA-06"
+          decision: "fx_rate_snapshot отдельная таблица, FK из payments.fx_snapshot_id"
+          rationale: "Курс DEC-010 фиксируется в момент инвойса; история курсов сохраняется для аудита и репортинга"
+        - id: "DEC-DATA-07"
+          decision: "Enum-поля через VARCHAR + CHECK (а не Postgres ENUM)"
+          rationale: "Простая миграционная гибкость — добавить значение = ALTER CHECK; ENUM требует ALTER TYPE с блокировкой"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Все таблицы из §23 ТЗ покрыты: passed (users, applications, payments, sessions + расширения)"
+        - "Дополнения (events, fx_rate_snapshot, late_payment_review, time_slots, bookings, match_feedback, kb_feedback): passed"
+        - "ER-диаграмма Mermaid: passed (6 диаграмм по контекстам)"
+        - "OpenAPI 3.1 для всех публичных endpoints: passed (auth, mini-app, admin, webhooks)"
+        - "Индексы и constraint'ы документированы: passed (включая partial indexes, GIN, vector ivfflat/hnsw)"
+
+    issues:
+      - severity: "low"
+        description: "Точный bounded-context map ожидается от Architect (TASK-008) — schemas.md ссылается на 11 контекстов, при расхождении понадобится sync"
+        recommendation: "После TASK-008 — сверить с workspace.dsl; правки минимальные (только имена контекстов)"
+      - severity: "low"
+        description: "Поля для звёзд (пороги, формула деградации) — Open Decision OD-CLUB-01..03, не блокируют схему (модель готова к параметрам)"
+        recommendation: "После получения решений клуба — заполнить конфиг (settings/social_rules) без миграций"
+      - severity: "medium"
+        description: "Конкретный USDT-провайдер не выбран — webhook_log.provider/signature алгоритм может потребовать уточнения"
+        recommendation: "Architect/Security/DevOps — выбрать провайдера до Phase 1 coding"
+
+    next_steps:
+      - action: "Использовать openapi.yaml как контракт для Coder/Frontend"
+        agent: "Coder"
+        priority: "high"
+      - action: "Сверить контексты с workspace.dsl"
+        agent: "Architect"
+        priority: "medium"
+      - action: "Threat-model для webhooks, JWT init_data, KYC данных"
+        agent: "Security"
+        priority: "high"
+
+    agent_data:
+      format: "data_summary"
+      content:
+        counts:
+          tables_total: 35
+          phase_1_tables: 21
+          phase_2_tables: 12
+          phase_3_tables: 4
+          bounded_contexts: 11
+          endpoints_total: 30
+          public_endpoints: 18
+          admin_endpoints: 12
+          webhooks: 2
+          domain_events: 35
+        key_models:
+          identity: ["users", "sessions", "admin_users", "audit_log"]
+          applications: ["applications", "application_history"]
+          payments: ["payment_methods", "fx_rate_snapshot", "payments", "webhook_log", "late_payment_review"]
+          subscriptions: ["subscriptions", "subscription_history", "renewal_reminders"]
+          access: ["invite_links", "law_acceptances", "fsm_states"]
+          calendar: ["time_slots", "bookings", "calendar_reminders"]
+          events: ["events"]
+          notifications: ["notification_queue", "notification_history"]
+          social: ["roles", "user_roles", "respects", "user_monthly_balance", "stars_history", "complaints"]
+          ai: ["member_profiles", "chat_messages", "kb_chunks", "daily_summaries", "ai_usage_log", "match_feedback", "kb_feedback"]
+          time_economy: ["time_gifts", "day_burns", "admin_day_adjustments", "lifetime_budgets"]
+        indexing_strategy:
+          partitioning: "events, chat_messages — RANGE по месяцу через pg_partman"
+          vector: "member_profiles → ivfflat lists=100; kb_chunks → HNSW cosine"
+          partial_indexes: "subscriptions active, invite_links live, late_payment open, notifications queued"
+          gin_indexes: "applications.form_data, events.properties"
+        retention:
+          events: "12 мес"
+          audit_log: "24 мес"
+          webhook_log: "6 мес"
+          notification_history: "12 мес"
+          chat_messages: "решается отдельно (RAG нужна вся история)"
+
+    signature: "Data Agent"

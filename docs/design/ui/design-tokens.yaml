@@ -1,0 +1,377 @@
+# ---
+# title: "Клуб 33 — Design Tokens"
+# created_by: "UI Agent"
+# created_at: "2026-05-15"
+# version: "1.0"
+# phase: "Design"
+# ---
+#
+# Машиночитаемые design tokens. Источник истины для CSS variables / Tailwind config /
+# TelegramUI theme override. Mini-app и web-админка используют ОДИН набор tokens.
+
+meta:
+  name: "Клуб 33 Design Tokens"
+  version: "1.0"
+  base_grid: 4              # px
+  base_font_size: 17        # px (iOS Telegram body)
+
+# ============================================================================
+# COLORS
+# ============================================================================
+colors:
+
+  # --- Primary brand (золотой Клуба 33) ---
+  primary:
+    light: "#C9A24A"
+    dark: "#E6BC5E"
+  primary_hover:
+    light: "#B58E3A"
+    dark: "#F2CC74"
+  primary_active:
+    light: "#9E7B2E"
+    dark: "#D9AE54"
+  text_on_primary:
+    light: "#FFFFFF"
+    dark: "#1A1A1A"
+
+  # --- Accent (link, second-level action; mini-app наследует от themeParams.button_color) ---
+  accent:
+    light: "#3390EC"        # fallback если themeParams отсутствует
+    dark: "#6AB3F3"
+  text_on_accent:
+    light: "#FFFFFF"
+    dark: "#FFFFFF"
+
+  # --- Semantic ---
+  success:
+    light: "#0F9D58"
+    dark: "#34C77A"
+  warning:
+    light: "#F4A100"
+    dark: "#FFC04D"
+  danger:
+    light: "#E84F4F"
+    dark: "#FF6B6B"
+  info:
+    light: "#3390EC"
+    dark: "#6AB3F3"
+
+  # --- Neutrals / surfaces ---
+  bg:
+    light: "#FFFFFF"
+    dark: "#17212B"
+  bg_secondary:
+    light: "#F4F4F5"
+    dark: "#232E3C"
+  bg_tertiary:
+    light: "#E8E8EA"
+    dark: "#2B3949"
+
+  text:
+    light: "#0F0F10"
+    dark: "#FFFFFF"
+  text_secondary:
+    light: "#707579"
+    dark: "#7D8B99"
+  text_tertiary:
+    light: "#A7A9AC"
+    dark: "#5F6B78"
+
+  border:
+    light: "#E2E2E5"
+    dark: "#2B3949"
+
+  # --- Domain semantics (механики клуба) ---
+  star_filled:
+    light: "#C9A24A"
+    dark: "#E6BC5E"
+  star_empty:
+    light: "#D8D8DA"
+    dark: "#3B485A"
+  respect_received:
+    light: "#0F9D58"
+    dark: "#34C77A"
+  respect_given:
+    light: "#3390EC"
+    dark: "#6AB3F3"
+  day_available:
+    light: "#C9A24A"
+    dark: "#E6BC5E"
+  day_gifted:
+    light: "#9E9E9E"
+    dark: "#7D8B99"
+  complaint:
+    light: "#E84F4F"
+    dark: "#FF6B6B"
+
+  lifetime_gradient:
+    light: "linear-gradient(135deg, #C9A24A 0%, #E6BC5E 100%)"
+    dark:  "linear-gradient(135deg, #C9A24A 0%, #E6BC5E 100%)"
+
+  # --- Overlays ---
+  overlay:
+    light: "rgba(0, 0, 0, 0.32)"
+    dark:  "rgba(0, 0, 0, 0.56)"
+
+# ============================================================================
+# TYPOGRAPHY
+# ============================================================================
+typography:
+
+  font_family:
+    base: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, Arial, sans-serif'
+    mono: 'ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace'
+
+  font_features:
+    base: '"tnum" on, "lnum" on'   # tabular + lining digits
+
+  weights:
+    regular:  400
+    medium:   500
+    semibold: 600
+    bold:     700
+
+  scale:
+    display:
+      size: "32px"
+      line_height: "40px"
+      weight: 700
+      use: "Onboarding welcome, hero"
+    h1:
+      size: "24px"
+      line_height: "32px"
+      weight: 700
+      use: "Заголовок страницы (админка)"
+    h2:
+      size: "22px"
+      line_height: "28px"
+      weight: 600
+      use: "Заголовок экрана mini-app"
+    h3:
+      size: "20px"
+      line_height: "26px"
+      weight: 600
+      use: "Section title"
+    h4:
+      size: "17px"
+      line_height: "22px"
+      weight: 600
+      use: "Cell title (большой)"
+    h5:
+      size: "15px"
+      line_height: "20px"
+      weight: 600
+      use: "Cell title"
+    body:
+      size: "17px"
+      line_height: "22px"
+      weight: 400
+      use: "Основной текст mini-app"
+    body_compact:
+      size: "15px"
+      line_height: "20px"
+      weight: 400
+      use: "Plain text админки"
+    subhead:
+      size: "14px"
+      line_height: "18px"
+      weight: 500
+      use: "Section header (TelegramUI)"
+    caption:
+      size: "13px"
+      line_height: "16px"
+      weight: 400
+      use: "Cell caption, метаданные"
+    caption_small:
+      size: "11px"
+      line_height: "14px"
+      weight: 500
+      use: "Бейджи, теги"
+    code:
+      size: "14px"
+      line_height: "18px"
+      weight: 500
+      family: "mono"
+      use: "Адреса кошельков, ID транзакций"
+
+# ============================================================================
+# SPACING (4px grid)
+# ============================================================================
+spacing:
+  "0":   "0"
+  xxs:   "2px"
+  xs:    "4px"
+  sm:    "8px"
+  md:    "12px"
+  base:  "16px"
+  lg:    "24px"
+  xl:    "32px"
+  xxl:   "48px"
+
+# ============================================================================
+# RADII
+# ============================================================================
+radii:
+  none: "0"
+  sm:   "4px"
+  md:   "8px"
+  lg:   "12px"
+  xl:   "16px"
+  full: "9999px"
+
+# ============================================================================
+# SHADOWS / ELEVATIONS
+# ============================================================================
+shadows:
+  none: "none"
+  sm:
+    light: "0 1px 2px rgba(0, 0, 0, 0.06)"
+    dark:  "0 0 0 1px #2B3949"          # на тёмном — border вместо тени
+  md:
+    light: "0 4px 12px rgba(0, 0, 0, 0.08)"
+    dark:  "0 0 0 1px #2B3949"
+  lg:
+    light: "0 8px 24px rgba(0, 0, 0, 0.12)"
+    dark:  "0 8px 24px rgba(0, 0, 0, 0.32)"
+  xl:
+    light: "0 16px 40px rgba(0, 0, 0, 0.16)"
+    dark:  "0 16px 40px rgba(0, 0, 0, 0.40)"
+
+  focus_ring:
+    light: "0 0 0 2px rgba(51, 144, 236, 0.6)"
+    dark:  "0 0 0 2px rgba(106, 179, 243, 0.7)"
+
+# ============================================================================
+# ANIMATIONS
+# ============================================================================
+animations:
+  durations:
+    instant: "0ms"
+    fast:    "150ms"
+    normal:  "250ms"
+    slow:    "400ms"
+  easings:
+    standard:    "cubic-bezier(0.25, 0.1, 0.25, 1)"
+    decelerate:  "cubic-bezier(0.16, 1, 0.3, 1)"
+    accelerate:  "cubic-bezier(0.4, 0, 1, 1)"
+  named:
+    button_hover:
+      duration: "150ms"
+      easing: "standard"
+    page_transition:
+      duration: "250ms"
+      easing: "standard"
+    sheet_open:
+      duration: "250ms"
+      easing: "decelerate"
+    respect_pulse:
+      duration: "300ms"
+      easing: "decelerate"
+    match_stagger:
+      duration: "250ms"
+      stagger: "80ms"
+      easing: "standard"
+    confetti: "DISABLED"          # решение UI Agent — не используем
+
+# ============================================================================
+# Z-INDEX
+# ============================================================================
+z_index:
+  base:    1
+  sticky:  100
+  header:  200
+  dropdown: 500
+  modal:   1000
+  toast:   2000
+  tooltip: 3000
+
+# ============================================================================
+# BREAKPOINTS (только для web-админки; mini-app — single mobile width)
+# ============================================================================
+breakpoints:
+  sm: "640px"
+  md: "768px"
+  lg: "1024px"
+  xl: "1280px"
+  "2xl": "1536px"
+
+# ============================================================================
+# HIT AREAS / SIZES
+# ============================================================================
+hit_area:
+  mini_app_min: "44px"           # iOS HIG / Telegram
+  desktop_sm:   "32px"
+  desktop_md:   "36px"
+  desktop_lg:   "40px"
+
+# ============================================================================
+# COMPONENT-LEVEL TOKENS (производные)
+# ============================================================================
+component:
+  button:
+    height_sm: "32px"
+    height_md: "40px"
+    height_lg: "48px"
+    padding_x_sm: "12px"
+    padding_x_md: "16px"
+    padding_x_lg: "20px"
+    radius: "{radii.md}"
+    radius_lg: "{radii.lg}"
+
+  input:
+    height_sm: "32px"
+    height_md: "40px"
+    height_lg: "48px"
+    padding_x: "12px"
+    radius: "{radii.md}"
+    border: "1px solid {colors.border}"
+
+  cell:
+    min_height: "48px"
+    padding_x: "16px"
+    padding_y: "12px"
+
+  card:
+    padding: "16px"
+    radius: "{radii.lg}"
+    bg: "{colors.bg_secondary}"
+
+  sheet:
+    radius_top: "{radii.xl}"
+    handle_color: "{colors.text_tertiary}"
+
+  star:
+    size_sm: "16px"
+    size_md: "20px"
+    size_lg: "24px"
+
+  avatar:
+    size_xs: "24px"
+    size_sm: "32px"
+    size_md: "40px"
+    size_lg: "56px"
+    size_xl: "80px"
+
+# ============================================================================
+# THEME PARAMS MAPPING (Telegram → tokens)
+# ============================================================================
+telegram_theme_mapping:
+  bg_color:            "colors.bg"
+  secondary_bg_color:  "colors.bg_secondary"
+  text_color:          "colors.text"
+  hint_color:          "colors.text_secondary"
+  link_color:          "colors.accent"
+  button_color:        "colors.accent"
+  button_text_color:   "colors.text_on_accent"
+  destructive_text_color: "colors.danger"
+
+# ============================================================================
+# ACCESSIBILITY
+# ============================================================================
+accessibility:
+  wcag_target: "AA"
+  contrast_min_text: 4.5
+  contrast_min_large_text: 3.0
+  focus_ring_width: "2px"
+  reduce_motion_strategy: "collapse_to_instant"
+  min_touch_target: "44px"

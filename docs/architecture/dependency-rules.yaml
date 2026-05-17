@@ -1,0 +1,209 @@
+# docs/architecture/dependency-rules.yaml
+# Граф допустимых зависимостей между модулями
+# Created by: Architect Agent | 2026-05-16 | v1.0 | Phase: Architecture
+
+version: "1.0"
+project: "Клуб 33"
+
+# === BACKEND: Django apps ===
+backend_modules:
+  core:
+    allowed_imports: []
+    description: "Базовый модуль: AuditLog/AuditLogService, middleware, утилиты, base classes, idempotency"
+
+  users:
+    allowed_imports: ["core"]
+    description: "Identity: User, TelegramAccount, Session, JWT, RBAC base"
+
+  applications:
+    allowed_imports: ["core", "users"]
+    description: "Заявка кандидата: Application, screening, статусы, импорт из Google Forms"
+
+  payments:
+    allowed_imports: ["core", "users"]
+    description: "Инвойсы, провайдеры (USDT/ЮKassa/СБП), webhook, forex_rate_snapshot, idempotency"
+
+  subscriptions:
+    allowed_imports: ["core", "users", "payments"]
+    description: "Тарифы (6/12 мес), Subscription, продление, lifetime, напоминания"
+
+  access_control:
+    allowed_imports: ["core", "users", "subscriptions"]
+    description: "Invite-ссылки (TTL/limit), FSM bot state, закон клуба, доступ в канал/чат"
+
+  calendar:
+    allowed_imports: ["core", "users", "applications"]
+    description: "club33calendar: TimeSlot, Booking, Reminder (DEC-009). Календарь основателя для интервью"
+
+  social:
+    allowed_imports: ["core", "users"]
+    description: "Roles (ниши), Respects (30/мес, лимит 3), Stars/Reputation, Complaints (анонимные)"
+
+  time_economy:
+    allowed_imports: ["core", "users", "subscriptions"]
+    description: "Gift/Burn дней, lifetime-бюджет (33 дня/год), admin-конвертер USD→дни"
+
+  ai_services:
+    allowed_imports: ["core", "users", "social", "subscriptions"]
+    description: "Matching, RAG (KB), Digest, embeddings (pgvector), model router, ai_usage_log"
+
+  notifications:
+    allowed_imports: ["core", "users", "subscriptions", "social", "payments"]
+    description: "Отправка уведомлений: бот, админ-чат, email (опц.). Шаблоны, очереди."
+
+  admin_dashboard:
+    allowed_imports:
+      - "core"
+      - "users"
+      - "applications"
+      - "payments"
+      - "subscriptions"
+      - "access_control"
+      - "calendar"
+      - "social"
+      - "time_economy"
+      - "ai_services"
+      - "notifications"
+    description: "Web-админка: CRUD, финансы, воронка, экспорт, дашборды. Агрегатор всех контекстов (read-mostly + admin actions)."
+
+  listener:
+    allowed_imports: ["core", "users", "ai_services"]
+    description: "Listener Bot: индексация чата клуба → embeddings. Только запись в ai_services"
+
+  audit:
+    allowed_imports: ["core"]
+    description: "AuditLog model + service (rule 04). Все контексты пишут сюда через сервис"
+
+# === FRONTEND: модули внутри SPA (mini-app + admin) ===
+frontend_modules:
+  types:
+    allowed_imports: []
+    description: "TypeScript типы и интерфейсы, OpenAPI-generated types"
+
+  utils:
+    allowed_imports: ["types"]
+    description: "Чистые утилиты: formatDate, parseInitData, money formatters"
+
+  api:
+    allowed_imports: ["types", "utils"]
+    description: "API-клиент (axios/fetch wrapper), интерсепторы JWT, error handling"
+
+  stores:
+    allowed_imports: ["types", "api", "utils"]
+    description: "State stores (Zustand/Redux): auth, user, fsm-state, notifications"
+
+  hooks:
+    allowed_imports: ["types", "api", "utils", "stores"]
+    description: "Custom React hooks: useAuth, useRespects, useMatch, useToast"
+
+  components:
+    allowed_imports: ["types", "utils", "hooks"]
+    description: "Переиспользуемые UI-компоненты (design-system): Button, Input, Card, Avatar"
+
+  features:
+    allowed_imports: ["types", "utils", "api", "stores", "hooks", "components"]
+    description: "Feature-modules по bounded contexts: respects, gifts, match, ask, digest, complaints, profile"
+
+  pages:
+    allowed_imports: ["types", "utils", "api", "stores", "hooks", "components", "features"]
+    description: "Страницы приложений (mini-app screens, admin sections)"
+
+# === BOT (Python, aiogram 3.x) ===
+bot_modules:
+  bot_core:
+    allowed_imports: []
+    description: "Bot bootstrap, dispatcher, middleware, config"
+
+  bot_fsm:
+    allowed_imports: ["bot_core"]
+    description: "FSM-состояния (14 состояний из IA), state-storage (Redis)"
+
+  bot_handlers:
+    allowed_imports: ["bot_core", "bot_fsm", "bot_services"]
+    description: "Хендлеры команд: /start, /respect, /gift, /burn, /ask, /match, /book"
+
+  bot_services:
+    allowed_imports: ["bot_core"]
+    description: "Клиенты к API/services: payments_client, applications_client, ai_client. БЕЗ прямого ORM"
+
+  bot_keyboards:
+    allowed_imports: ["bot_core"]
+    description: "Reply и inline keyboards"
+
+# === LISTENER (Python, Telethon) ===
+listener_modules:
+  listener_core:
+    allowed_imports: []
+    description: "Telethon client bootstrap, config"
+
+  listener_handlers:
+    allowed_imports: ["listener_core", "listener_services"]
+    description: "Хендлеры событий: new_message, edited_message"
+
+  listener_services:
+    allowed_imports: ["listener_core"]
+    description: "API-клиент для записи embeddings и индекса (только в ai_services)"
+
+# === WORKER (APScheduler) ===
+worker_modules:
+  worker_core:
+    allowed_imports: []
+    description: "Scheduler bootstrap, jobstore, config"
+
+  worker_jobs:
+    allowed_imports: ["worker_core"]
+    description: "Cron-задачи: monthly_respects_reset, weekly_digest, renewal_reminders, kb_reindex. Используют Django ORM через apps API"
+
+# === Контракты между bounded contexts (events) ===
+context_contracts:
+  - publisher: "applications"
+    event: "ApplicationApproved"
+    consumers: ["calendar", "notifications"]
+    description: "Заявка одобрена → создаётся слот интервью + уведомление"
+
+  - publisher: "payments"
+    event: "PaymentConfirmed"
+    consumers: ["subscriptions", "access_control", "notifications", "audit"]
+    description: "Оплата подтверждена → активируется подписка + запускается онбординг"
+
+  - publisher: "subscriptions"
+    event: "SubscriptionExpiringSoon"
+    consumers: ["notifications"]
+    description: "Подписка истекает <10 дней → напоминание"
+
+  - publisher: "subscriptions"
+    event: "SubscriptionExpired"
+    consumers: ["access_control", "notifications"]
+    description: "Подписка истекла → revoke доступа + уведомление"
+
+  - publisher: "access_control"
+    event: "LawAccepted"
+    consumers: ["subscriptions", "notifications", "audit"]
+    description: "Закон принят → активация active state"
+
+  - publisher: "social"
+    event: "RespectGiven"
+    consumers: ["ai_services", "audit", "notifications"]
+    description: "Дан респект → уведомление получателю (без имени), сигнал для AI"
+
+  - publisher: "social"
+    event: "ComplaintFiled"
+    consumers: ["notifications", "audit"]
+    description: "Жалоба → уведомление модератору"
+
+  - publisher: "time_economy"
+    event: "DaysGifted"
+    consumers: ["subscriptions", "notifications", "audit"]
+    description: "Дар времени → обновление сроков подписок"
+
+  - publisher: "calendar"
+    event: "InterviewBooked"
+    consumers: ["applications", "notifications"]
+    description: "Слот забронирован → переход FSM в awaiting_interview"
+
+  - publisher: "ai_services"
+    event: "DigestGenerated"
+    consumers: ["notifications", "audit"]
+    description: "Еженедельный digest готов → рассылка участникам"
+
+# Документ создан: Architect Agent | Дата: 2026-05-16

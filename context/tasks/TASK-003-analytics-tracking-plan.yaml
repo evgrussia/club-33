@@ -1,0 +1,154 @@
+task:
+  id: "TASK-003"
+  file: "TASK-003-analytics-tracking-plan.yaml"
+
+  request:
+    agent: "Analytics"
+    type: "create"
+    priority: "high"
+    created_at: "2026-05-15"
+    phase: "Discovery"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: []
+    checkpoint_ref: "CP-000-intake-2026-05-15"
+
+    input:
+      summary: |
+        Tracking plan и метрики проекта. Покрыть воронку (ТЗ §22.8) от bot_start
+        до invite_used, продление, AI-метрики (качество матчинга, KB, расходы на
+        inference), социальные метрики (респекты, жалобы, звёзды), финансы
+        (LTV, выручка, средний чек, конверсия продлений).
+      references:
+        - "docs/Club 33 — ТЗ v5 (финал, 2026-05-05).pdf"
+        - "context/project-brief.yaml"
+      constraints:
+        - "Все события воронки из §22.8 ТЗ должны быть в tracking plan"
+        - "Метрики разнесены по 3 фазам релиза"
+        - "Каждое событие: name, trigger, properties (json schema), owner"
+
+    expected_output:
+      deliverables:
+        - "docs/discovery/analytics/tracking-plan.md"
+        - "docs/discovery/analytics/metrics-framework.md"
+        - "docs/discovery/analytics/funnel-definition.md"
+      format: "analytics_summary"
+      quality_criteria:
+        - "Полная воронка с конверсиями: bot_start→approved→payment_completed→invite_used"
+        - "Метрики продления (count, %, retention)"
+        - "AI-метрики (match quality, KB recall, inference cost/user)"
+        - "Социальные метрики (respects/user/mo, complaints/mo, avg stars)"
+        - "Финансовые метрики (LTV, ARPU, MRR, churn по фазам)"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-15"
+    duration: "~3h"
+    checkpoint_ref: null
+
+    output:
+      summary: |
+        Создан полный tracking plan (37 событий по 3 фазам), metrics framework
+        (8 групп метрик с owner/target/частотой) и funnel definition (главная
+        воронка + 4 sub-funnels). Воронка из §22.8 ТЗ покрыта; NSM определена
+        (Active Paid Members); end-to-end conversion bot_start→active ≈3.8%
+        target.
+      artifacts:
+        - path: "docs/discovery/analytics/tracking-plan.md"
+          description: "Tracking plan: 37 событий (21 Phase 1, 11 Phase 2, 4 Phase 3, 2 systemic) с JSON schema, trigger, owner, phase"
+        - path: "docs/discovery/analytics/metrics-framework.md"
+          description: "8 групп метрик: Acquisition, Revenue, Retention, LTV, Social, AI, Time Economy, Operational. NSM + дашборды + owner-карта"
+        - path: "docs/discovery/analytics/funnel-definition.md"
+          description: "Главная воронка из 9 шагов с конверсиями, drop-off, временами; sub-funnels: Renewal, AI (match/KB/digest), Time Economy, Churn"
+      decisions:
+        - id: "DEC-ANL-001"
+          decision: "North Star Metric = Active Paid Members"
+          rationale: "Объединяет приобретение, удержание и факт реальной интеграции (присоединение к каналу); понятен основателю и команде"
+        - id: "DEC-ANL-002"
+          decision: "AI cost-per-user/month target ≤ $2"
+          rationale: "Контроль расходов на inference при использовании оркестрации моделей (DEC-008) — haiku для дешёвых задач, opus только для сложного матчинга"
+        - id: "DEC-ANL-003"
+          decision: "Renewal Rate target дифференцирован по тарифам: m6≥55%, m12≥70%"
+          rationale: "Учитывает разную лояльность: длинная подписка = выше commitment"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "Полная воронка bot_start→approved→payment→invite_used: passed"
+        - "Метрики продления (count, %, retention): passed"
+        - "AI-метрики (match quality, KB recall, inference cost): passed"
+        - "Социальные метрики (respects, complaints, stars): passed"
+        - "Финансовые метрики (LTV, ARPU, MRR, churn): passed"
+        - "Все события воронки §22.8 ТЗ покрыты: passed"
+        - "Метрики разнесены по 3 фазам: passed"
+        - "Каждое событие: name, trigger, properties, owner: passed"
+
+    issues:
+      - severity: "medium"
+        description: "Match Quality (subjective) требует UI-механизма обратной связи после клика по матчу — не определено в ТЗ"
+        recommendation: "UX Agent: добавить «полезно/не полезно» в карточку матча; пока — через ad-hoc опросы"
+      - severity: "low"
+        description: "Метрика 'left_channel' ограничена API Telegram (chat_member updates только при действиях бота)"
+        recommendation: "Dev Agent: проверить, выдаёт ли Telegram updates на выход участника из приватного канала"
+      - severity: "low"
+        description: "Пороги звёзд и коэффициент деградации остаются open question — метрика Avg Stars зависит от этого"
+        recommendation: "Product Agent: зафиксировать с командой клуба до Phase 2"
+
+    next_steps:
+      - action: "Architect Agent: спроектировать таблицу events и пайплайн ingestion"
+        agent: "Architect"
+        priority: "high"
+      - action: "Data Agent: ER-модель events + ai_usage_log + materialized views для дашбордов"
+        agent: "Data"
+        priority: "high"
+      - action: "UI Agent: дизайн дашбордов Founder/Product/AI/Moderation в админке"
+        agent: "UI"
+        priority: "medium"
+      - action: "UX Agent: добавить feedback-mechanism для match quality и KB usefulness"
+        agent: "UX"
+        priority: "medium"
+
+    agent_data:
+      format: "analytics_summary"
+      content:
+        events_total: 37
+        events_by_phase:
+          phase_1: 21
+          phase_2: 11
+          phase_3: 4
+          systemic: 2
+        metrics_groups: 8
+        funnels:
+          main: "bot_start → 8 шагов → ACTIVE MEMBER (target 3.8%)"
+          sub_funnels: ["Renewal", "Matching", "KB", "Digest", "Gift", "Burn", "Churn"]
+        north_star_metric: "Active Paid Members"
+        key_targets:
+          end_to_end_conversion: "≥3.8%"
+          payment_conversion_after_approval: "≥70%"
+          renewal_rate_overall: "≥60%"
+          renewal_rate_m6: "≥55%"
+          renewal_rate_m12: "≥70%"
+          ai_cost_per_user_month: "≤$2"
+          kb_recall_useful: "≥70%"
+          match_ctr: "≥15%"
+          digest_open_rate: "≥50%"
+          avg_stars: "≥2.5"
+        owners_mapped:
+          - "Founder"
+          - "Product"
+          - "Community"
+          - "Moderation"
+          - "AI"
+          - "DevOps"
+          - "Marketing"
+          - "Bot"
+          - "Backend"
+          - "Mini-app"
+          - "Admin"
+        decisions_dependencies:
+          - "DEC-008 (AI orchestration) → ai_usage_log + cost-per-model метрики"
+          - "DEC-010 (USD→RUB) → FX Spread метрика + fx_rate_snapshot в invoice_created"
+          - "DEC-009 (calendar) → interview_booked event source"
+          - "DEC-005 (admin roles) → owner-карта дашбордов"
+
+    signature: "Analytics Agent"

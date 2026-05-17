@@ -1,0 +1,102 @@
+phase_summary:
+  phase: "System Adaptation"
+  status: "completed"
+  created_at: "2026-05-15"
+  created_by: "Orchestrator Agent"
+
+  domain_analysis:
+    primary_domain: "Closed community / Telegram Mini-App SaaS"
+    knowledge_areas:
+      - "Telegram Bot API + Mini-App (WebApp, init_data, invite-ссылки)"
+      - "Payments: USDT (TRC20/TON), ЮKassa, СБП, webhook-обработка"
+      - "Социальные механики: репутация, респекты, жалобы, роли"
+      - "Внутренняя валюта (дар/сжигание дней)"
+      - "AI (Anthropic Claude): RAG, embeddings, матчинг, summarization"
+      - "Web-админка (CRUD, финансы, воронка, экспорт)"
+      - "FSM в боте, scheduled tasks (digest, баланс, напоминания)"
+
+  tech_map:
+    frontend_admin: "React 18 + Vite 6 + TypeScript"
+    miniapp: "Telegram WebApp (React+Vite предпочтительно, открытый вопрос)"
+    backend: "Django 5 + DRF"
+    bot: "Python (aiogram 3.x — рекомендация, утвердить на Architecture)"
+    db: "PostgreSQL 16 + pgvector"
+    cache: "Redis 7"
+    scheduler: "APScheduler"
+    ai: "Anthropic Python SDK (+ опционально LangChain для RAG)"
+    payments: ["ЮKassa SDK", "USDT провайдер (выбрать)", "СБП (ручная сверка)"]
+    auth_miniapp: "JWT + Telegram init_data validation"
+    infra: "Docker, Nginx, Ubuntu 24.04, CI = GitHub Actions"
+
+  active_roster:
+    agents:
+      coordination: ["Orchestrator"]
+      discovery: ["Product", "Research", "Analytics", "Business-Analyst"]
+      design: ["UX", "UI", "Content"]
+      architecture: ["Architect", "Data", "Security"]
+      development: ["Dev", "AI-Agents", "Coder"]
+      quality: ["QA", "Review"]
+      operations: ["DevOps", "SRE"]
+      marketing: ["Marketing"]
+    deactivated: []
+    rationale: |
+      Проект достаточно сложный (FSM-бот, mini-app, платежи, AI, админка, инфра).
+      Все базовые агенты релевантны:
+        - Business-Analyst — для воронки и бизнес-процессов
+        - Content — для тонa «на ты» и микрокопирайта (закон клуба, ответы бота)
+        - SRE — для мониторинга платежей (5–10 мин SLO), webhook-надёжности, AI-стоимости
+        - AI-Agents — для матчинга, RAG, digest, оркестрации Claude
+      В Phase 5.5 будут сгенерированы DDD-агенты под bounded contexts.
+
+    skills:
+      always_on:
+        - "context-manager"
+        - "verification-engine"
+        - "document-generator"
+        - "web-research"
+        - "ssh-deployment"
+        - "github-actions"
+        - "architecture-validation"
+        - "visual-regression"
+        - "system-adaptation"
+        - "ddd-agent-generation"
+        - "telegram-bot-api"
+        - "telegram-core-api"   # потенциально для listener-бота (MTProto)
+        - "yookassa-payments"
+        - "langchain-development"
+        - "image-generator"
+      conditional:
+        - skill: "ton-blockchain"
+          condition: "если выберем USDT-TON провайдера с прямой интеграцией"
+
+    new_agents_required: []
+    new_skills_required:
+      - name: "anthropic-claude-orchestration"
+        rationale: "ТЗ требует оркестрацию моделей Anthropic (быстрая/умная/embedding) с контролем стоимости. Текущий langchain-development этого не покрывает явно."
+        status: "to_be_designed_in_phase_3_or_5"
+        priority: "medium"
+      - name: "usdt-payments-trc20-ton"
+        rationale: "Прямая интеграция USDT-провайдеров с webhook (TRC20 и TON), отслеживание транзакций, ретраи"
+        status: "to_be_designed_in_phase_5"
+        priority: "high"
+      - name: "sbp-payments"
+        rationale: "Ручная сверка СБП-инвойсов (или интеграция, если провайдер появится)"
+        status: "lightweight — может быть частью основного skill payments"
+        priority: "low"
+
+  bounded_contexts_preview:
+    note: "Будут уточнены Architect Agent в Phase 5 и оформлены как DDD-агенты в Phase 5.5"
+    candidates:
+      - "Identity & Access (users, sessions, JWT, Telegram-auth)"
+      - "Applications (заявка, модерация, статусы)"
+      - "Payments (инвойсы, провайдеры, webhook, ручная сверка)"
+      - "Subscriptions (тарифы, продление, lifetime, напоминания)"
+      - "Access Control (invite-ссылки, канал/чат, закон клуба, FSM)"
+      - "Social (роли, респекты, звёзды, жалобы)"
+      - "Time Economy (дар, сжигание, lifetime-бюджет, конвертер)"
+      - "AI Services (матчинг, RAG база знаний, digest)"
+      - "Admin & Finance (CRUD, финансы, воронка, экспорт, дашборды)"
+      - "Notifications (бот, админ-чат, email опц.)"
+
+  user_approval_required: true
+  approval_status: "pending"

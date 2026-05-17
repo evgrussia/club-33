@@ -1,0 +1,217 @@
+task:
+  id: "TASK-010"
+  file: "TASK-010-security-threat-model.yaml"
+
+  request:
+    agent: "Security"
+    type: "create"
+    priority: "high"
+    created_at: "2026-05-16"
+    phase: "Architecture"
+    requested_by: "Orchestrator"
+    parent_task_id: null
+    depends_on: ["TASK-001", "TASK-004"]
+    checkpoint_ref: "CP-002-design-2026-05-15"
+
+    input:
+      summary: |
+        Threat model «Клуба 33»: платежи (USDT/ЮKassa/СБП, webhook spoofing,
+        idempotency, replay), JWT mini-app (Telegram init_data validation, signature),
+        RBAC (super/mod/support по DEC-005), KYC данные, AI-данные (промпт-инъекции,
+        PII в KB), 152-ФЗ + GDPR для участников. OWASP Top 10 checks.
+      references:
+        - "docs/discovery/business/payment-process.md"
+        - "docs/discovery/prd.md"
+        - "context/decisions.yaml"
+      constraints:
+        - "Тон документа — actionable (что делать), не abstract threat lists"
+        - "Каждая угроза: STRIDE-категория + impact + likelihood + mitigation"
+
+    expected_output:
+      deliverables:
+        - "docs/architecture/security/threat-model.md"
+        - "docs/architecture/security/owasp-top-10-checks.md"
+        - "docs/architecture/security/payments-security.md"
+        - "docs/architecture/security/ai-security.md"
+        - "docs/architecture/security/privacy-compliance.md"
+        - "docs/architecture/security/secrets-management.md"
+      format: "security_summary"
+      quality_criteria:
+        - "STRIDE покрытие для всех bounded contexts"
+        - "OWASP Top 10 — каждый пункт с конкретными mitigations для проекта"
+        - "Payment security: webhook signature, idempotency, anti-fraud"
+        - "AI security: prompt injection, data poisoning, PII в RAG"
+        - "Privacy: 152-ФЗ + GDPR (right to be forgotten, consent for KB indexing)"
+
+  response:
+    status: "completed"
+    completed_at: "2026-05-16"
+    duration: "~3h"
+    checkpoint_ref: "CP-002-design-2026-05-15"
+
+    output:
+      summary: |
+        Создана полная Security-документация Phase 5: STRIDE threat model по
+        10 bounded contexts (41 угроза с конкретными mitigations), OWASP Top 10
+        чеклист с реализацией на нашем стеке, детальная payments security
+        (webhook HMAC, idempotency, anti-fraud, edge cases, RBAC), AI security
+        (prompt injection, PII redaction, data poisoning, cost cap), privacy
+        compliance (152-ФЗ + GDPR + retention + право на удаление), secrets
+        management (24 секрета, ротация, Vault, gitleaks).
+      artifacts:
+        - path: "docs/architecture/security/threat-model.md"
+          description: "STRIDE-модель по 10 bounded contexts, 41 угроза с mitigations + Top-5 critical"
+        - path: "docs/architecture/security/owasp-top-10-checks.md"
+          description: "OWASP Top 10 (2021) с конкретными mitigations для Django+React+PG+Redis+Telegram"
+        - path: "docs/architecture/security/payments-security.md"
+          description: "Webhook HMAC, idempotency, replay protection, anti-fraud, refund policy, RBAC"
+        - path: "docs/architecture/security/ai-security.md"
+          description: "Prompt injection, PII redaction, KB data poisoning, cost cap, Listener bot, embedding inversion"
+        - path: "docs/architecture/security/privacy-compliance.md"
+          description: "152-ФЗ + GDPR, согласия, локализация ПДн, right to delete, retention, KYC шифрование"
+        - path: "docs/architecture/security/secrets-management.md"
+          description: "Инвентаризация 24 секретов, Vault, ротация, gitleaks, bootstrap, runbooks"
+      decisions:
+        - id: "DEC-SEC-001"
+          decision: "Допуск ±0.5% по сумме для USDT (BA-decision подтверждён); webhook + двойная сверка GET-API для ЮKassa"
+          rationale: "Защита от webhook spoofing даже при компрометации HMAC secret"
+        - id: "DEC-SEC-002"
+          decision: "2FA (TOTP) обязателен для всех админ-ролей (Super/Mod/Support)"
+          rationale: "Компрометация Super = доступ ко всему; защита от brute-force"
+        - id: "DEC-SEC-003"
+          decision: "PII redaction перед отправкой в Anthropic (regex email/phone + presidio Phase 2)"
+          rationale: "Соответствие 152-ФЗ при трансграничной передаче"
+        - id: "DEC-SEC-004"
+          decision: "PostgreSQL primary в РФ (рекомендация Selectel/VK/Yandex)"
+          rationale: "152-ФЗ ст.18 п.5 — локализация ПДн граждан РФ"
+        - id: "DEC-SEC-005"
+          decision: "Vault для секретов в Phase 2+; /opt/club33/.env chmod 600 для Phase 1 MVP"
+          rationale: "Баланс security vs. complexity для MVP"
+        - id: "DEC-SEC-006"
+          decision: "AES-256-GCM для KYC данных при включении функции (поле-level encryption)"
+          rationale: "1-2 уровень защиты по 152-ФЗ для спец. категорий"
+        - id: "DEC-SEC-007"
+          decision: "Listener индексирует ТОЛЬКО при law_accepted_at IS NOT NULL + opt-out команда /optout_kb"
+          rationale: "Явное согласие + контроль пользователя над своими данными"
+
+    quality:
+      completion_percentage: 100
+      criteria_met:
+        - "STRIDE покрытие для всех bounded contexts: passed (10 контекстов, 41 угроза)"
+        - "OWASP Top 10 — каждый пункт с конкретными mitigations: passed (10/10)"
+        - "Payment security: webhook signature, idempotency, anti-fraud: passed"
+        - "AI security: prompt injection, data poisoning, PII в RAG: passed"
+        - "Privacy: 152-ФЗ + GDPR (right to be forgotten, consent): passed"
+
+    issues:
+      - severity: "high"
+        description: "Юридическое согласование текстов «Закона клуба» (части III и IV), политики конфиденциальности и форм согласия — блокирующий пункт для Phase 6"
+        recommendation: "Product Agent + внешний юрист (специализация 152-ФЗ + GDPR) до старта Development"
+      - severity: "high"
+        description: "Refund policy не определена бизнесом"
+        recommendation: "Product Agent оформляет до Phase 6 (требование 152-ФЗ ст.18.1 + ЗоЗПП)"
+      - severity: "medium"
+        description: "Хостинг РФ vs зарубежный не выбран"
+        recommendation: "DevOps Phase 8 — определить провайдера; если РФ-пользователи преобладают, рекомендую Selectel/VK Cloud"
+      - severity: "medium"
+        description: "USDT-провайдер не выбран → нельзя финализировать N confirmations и webhook signature алгоритм"
+        recommendation: "Architect Agent (TASK-008) выбирает провайдера; Security дополняет payments-security.md"
+      - severity: "low"
+        description: "Vault инфраструктура — отложена до Phase 2; на Phase 1 MVP — .env chmod 600"
+        recommendation: "DevOps Phase 8: план миграции в Vault на Phase 2"
+
+    next_steps:
+      - action: "Architect Agent — учесть Security mitigations в workspace.dsl (outbound whitelist, rate limit, FSM constraints)"
+        agent: "Architect"
+        priority: "high"
+      - action: "Data Agent — учесть schema fields: payments_webhook_log, kb_indexing_consent, kyc_encrypted_*, audit_masked_fields"
+        agent: "Data"
+        priority: "high"
+      - action: "Product Agent — refund policy + согласование текстов согласий с юристом"
+        agent: "Product"
+        priority: "high"
+      - action: "DevOps Agent (Phase 8) — gitleaks CI, Vault setup plan, runbooks, security headers Nginx"
+        agent: "DevOps"
+        priority: "medium"
+      - action: "AI-Agents Agent — реализовать PII redaction + prompt injection tests + cost cap в дизайне"
+        agent: "AI-Agents"
+        priority: "high"
+
+    agent_data:
+      format: "security_summary"
+      content:
+        threats_by_stride:
+          spoofing: 7
+          tampering: 17
+          repudiation: 3
+          information_disclosure: 7
+          denial_of_service: 3
+          elevation_of_privilege: 14
+          total_records: 41
+        bounded_contexts_covered:
+          - "Identity & Access"
+          - "Applications"
+          - "Payments"
+          - "Subscriptions"
+          - "Access Control"
+          - "Social"
+          - "Time Economy"
+          - "AI Services"
+          - "Calendar"
+          - "Admin & Finance"
+        top_critical_risks:
+          - id: "T-PM-01"
+            name: "Webhook spoofing (USDT/ЮKassa)"
+            mitigation: "HMAC verification + IP whitelist + двойная сверка GET-API"
+          - id: "T-AI-01"
+            name: "Prompt injection"
+            mitigation: "Разделение system/user сообщений, output filter, rate limit"
+          - id: "T-SC-02"
+            name: "Деанонимизация жалобы"
+            mitigation: "reporter_id скрыт от модератора, отдельный serializer, audit"
+          - id: "T-IA-03"
+            name: "Brute force админ-логина"
+            mitigation: "2FA TOTP обязателен, rate limit, account lockout"
+          - id: "T-AC-01"
+            name: "Утечка invite-ссылки"
+            mitigation: "TTL 24ч, member_limit=1, revoke after first use, bind to user_id"
+        owasp_top_10_coverage:
+          A01_broken_access_control: "RBAC permission_classes + object-level + matrix tests"
+          A02_cryptographic_failures: "TLS 1.2+, HSTS, AES-256-GCM для KYC, JWT 64+байт"
+          A03_injection: "ORM only, no f-string SQL, CSP, escape_markdown, no dangerouslySetInnerHTML"
+          A04_insecure_design: "Threat model, FSM, idempotency, defense in depth"
+          A05_misconfiguration: "Django check --deploy, Nginx headers, DEBUG=False"
+          A06_vulnerable_components: "pip-audit + npm audit + Dependabot в CI"
+          A07_authentication: "Telegram init_data HMAC, 2FA админы, rate limit, JWT TTL"
+          A08_integrity: "HMAC webhook, SRI, WORM audit dump"
+          A09_logging: "AuditLogService обязателен, alerts админ-чат"
+          A10_ssrf: "Outbound whitelist, no user-controlled URL"
+        compliance:
+          russian_152_fz:
+            consent_points: 3
+            data_localization: "PG primary в РФ (рекомендация)"
+            right_to_deletion: "10 раб. дней (DELETE /api/v1/me)"
+            rkn_notification_required: true
+          gdpr:
+            applicability: "если есть участники ЕЭЗ"
+            right_to_be_forgotten: "30 дней"
+            data_portability: "GET /api/v1/me/export (JSON)"
+            breach_notification: "72 часа"
+          retention:
+            audit_log_db: "90 дней"
+            financial_records: "5 лет (402-ФЗ)"
+            applications_rejected: "90 дней"
+        secrets_inventory:
+          total: 24
+          critical: 12
+          high: 7
+          medium: 4
+          low: 1
+        blocking_for_phase_6:
+          - "Юридическое согласование текстов согласий + политики конфиденциальности"
+          - "Refund policy (Product decision)"
+          - "Уведомление Роскомнадзора подано"
+          - "Выбор USDT-провайдера (Architect)"
+          - "Решение по хостингу РФ vs зарубежный (DevOps)"
+
+    signature: "Security Agent"

@@ -1,0 +1,104 @@
+checkpoint:
+  id: "CP-001-discovery-2026-05-15"
+  created_at: "2026-05-15"
+  created_by: "Orchestrator Agent"
+
+  phase: "Discovery"
+  status: "completed"
+
+  summary: |
+    Discovery (Phase 3) полностью завершён. 4 агента (Product, Research,
+    Analytics, Business-Analyst) отработали параллельно и создали 15
+    артефактов. PRD покрывает §1–§25 ТЗ с разбивкой на 3 фазы (52 User
+    Stories, 6 персон). Research выявил рыночный gap (AI+RAG+digest+соц
+    в одном продукте) и предложил TelegramUI. Analytics: 37 событий, 8
+    групп метрик, NSM = Active Paid Members. Business-Analyst: 12
+    процессов со swim-lane, 14 FSM-состояний, RBAC по DEC-005.
+
+    Расхождение NSM (Product=WAM с действием, Analytics=APM) разрешить
+    на Architecture Gate.
+
+    Готов к Phase 4 — Design.
+
+  participating_agents:
+    - agent: "Product"
+      contribution: "Vision, PRD, 52 User Stories, 6 Personas"
+    - agent: "Research"
+      contribution: "Конкурентный анализ 10 клубов, UI-референсы, TOP-5 рекомендаций"
+    - agent: "Analytics"
+      contribution: "Tracking plan (37 событий), metrics framework, воронка"
+    - agent: "Business-Analyst"
+      contribution: "12 бизнес-процессов, 14 FSM-состояний, RBAC-матрица"
+    - agent: "Orchestrator"
+      contribution: "Координация, Discovery summary, checkpoint"
+
+  artifacts:
+    - path: "context/summaries/discovery-summary.yaml"
+      status: "created"
+      summary: "Phase summary Discovery: 15 артефактов, 17 decisions, blockers"
+    # Артефакты Product/Research/Analytics/BA задокументированы в discovery-summary.yaml
+
+  decisions:
+    - id: "DEC-011"
+      decision: "NSM проекта будет согласована на Architecture Gate — пока два варианта"
+      rationale: "Product предложил WAM с действием (engagement), Analytics — Active Paid Members (revenue+engagement). Architect/Product выберут финальную или композитную."
+      stakeholder: "Orchestrator (escalation pending)"
+    - id: "DEC-012"
+      decision: "Параметры репутации (звёзды, деградация, неактивность) реализуются как конфигурируемые admin-настройки"
+      rationale: "DEC-R-004: команда клуба сможет калибровать на первых месяцах без релиза. Снимает блок OD-CLUB-01..03 для разработки."
+      stakeholder: "Research + Orchestrator"
+    - id: "DEC-013"
+      decision: "Перейти к Phase 4 — Design параллельно с эскалацией оставшихся open questions"
+      rationale: "Discovery даёт достаточно материала для user flows и wireframes. Open questions (текст закона, политика возвратов) не блокируют дизайн, нужны к Architecture Gate."
+      stakeholder: "Orchestrator"
+
+  tasks:
+    completed_since_last_checkpoint:
+      - "TASK-001"
+      - "TASK-002"
+      - "TASK-003"
+      - "TASK-004"
+    in_progress: []
+    totals:
+      completed: 4
+      in_progress: 0
+      blocked: 0
+      total: 4
+
+  next_actions:
+    - action: "Эскалировать к пользователю: Combat-бот, club33calendar, политика возвратов, тексты закона клуба"
+      agent: "User"
+      priority: 1
+    - action: "Запустить Phase 4 — Design: UX (user flows + wireframes)"
+      agent: "UX"
+      priority: 2
+    - action: "Запустить Phase 4 — Design: UI (design system + TelegramUI)"
+      agent: "UI"
+      priority: 2
+    - action: "Запустить Phase 4 — Design: Content (UX-copy, тон «на ты», уведомления)"
+      agent: "Content"
+      priority: 3
+
+  blockers:
+    - blocker: "OD-CLUB-04/05: текст «Закона клуба» + фраза согласия"
+      impact: "Блокирует Phase 1 (US-015) — не блокирует Design"
+      resolution: "Запросить у заказчика до Architecture Gate"
+    - blocker: "Combat-бот юзернейм не получен"
+      impact: "Снижает качество UI-референса"
+      resolution: "Запросить у заказчика; есть альтернативные референсы"
+    - blocker: "club33calendar — существует ли?"
+      impact: "Влияет на scope Phase 1 (DEC-009)"
+      resolution: "Architect Agent выясняет на Phase 5; fallback Calendly"
+    - blocker: "Политика возвратов не определена"
+      impact: "Юр. риск при первых платежах"
+      resolution: "Product + Architect готовят черновик до Phase 6"
+
+  metrics:
+    completion_percentage: 100
+    documents_created: 15  # 4 Product + 3 Research + 3 Analytics + 5 BA
+    decisions_made: 17     # 6 Product + 5 Research + 3 Analytics + 5 BA - 2 дубликата
+    fsm_states_documented: 14
+    user_stories: 52
+    business_processes: 12
+    analytics_events: 37
+    competitors_analyzed: 10

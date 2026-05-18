@@ -1,8 +1,8 @@
 task_index:
-  last_id: 11
-  total: 11
+  last_id: 12
+  total: 12
   created_at: "2026-05-15"
-  updated_at: "2026-05-16 (Phase 5 Architecture — TASK-008..011 delegated)"
+  updated_at: "2026-05-17 (TASK-012 — Orchestrator prototype spec for Claude Design)"
 
   tasks:
     - id: "TASK-001"
@@ -114,3 +114,13 @@ task_index:
       summary: "AI-архитектура: матчинг, RAG, digest, model router, cost tracking, prompts"
       created_at: "2026-05-16"
       completed_at: "2026-05-16"
+
+    - id: "TASK-012"
+      file: "TASK-012-orchestrator-claude-design-prototype-spec.yaml"
+      agent: "Orchestrator"
+      type: "create"
+      phase: "Pre-Development (Prototyping)"
+      status: "completed"
+      summary: "Tech spec для Claude Design: интерактивный прототип с моковыми данными (mini-app + admin + bot)"
+      created_at: "2026-05-17"
+      completed_at: "2026-05-17"
